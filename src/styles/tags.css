@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+.tag {
+  @apply text-sm/4.5 font-semibold px-2.5 py-1.5 rounded-full flex items-center justify-center shrink-0;
+}
+
+.tag.blue {
+  @apply bg-brand-blue-200 text-brand-blue-800;
+}
+
+.tag.gray {
+  @apply bg-brand-gray-300 text-brand-gray-800;
+}
+
+.tag.black {
+  @apply bg-brand-gray-900 text-brand-gray-200;
+}
+
+.tag.red {
+  @apply bg-brand-red-200 text-brand-red-800;
+}
+
+.tag.green {
+  @apply bg-[#EBF1D8] text-[#1D3208];
+}
+
+.tag.yellow {
+  @apply bg-[#F9F5EC] text-[#D8A215];
+}
+
+.tag.uppercase {
+  @apply uppercase tracking-widest;
+}
+
+.tag.white {
+  @apply border-standard;
+}
+
+.tag.white.icon-right {
+  @apply py-1 pl-3 pr-1.5 gap-1 font-semibold tracking-tight;
+}
+
+.tag.small {
+  @apply text-xs font-semibold py-0.5 px-2;
+}

@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+.notification {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  padding: 1rem;
+  text-align: center;
+  font-weight: 500;
+  transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+  transform: translateY(-10px);
+  opacity: 0;
+  z-index: 9999;
+}
+
+.notification.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.notification.success {
+  background-color: rgb(220 252 231); /* bg-green-100 */
+  color: rgb(22 101 52); /* text-green-800 */
+}
+
+.notification.error {
+  background-color: rgb(254 226 226); /* bg-red-100 */
+  color: rgb(153 27 27); /* text-red-800 */
+}

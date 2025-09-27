@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+.checkbox {
+  @apply w-[1.375rem] h-[1.375rem] border-standard rounded-md flex items-center justify-center cursor-pointer transition-all duration-200 ease-in-out text-white;
+}
+
+.checkbox.selected {
+  @apply bg-black border-black;
+}

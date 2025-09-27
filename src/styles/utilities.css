@@ -1,0 +1,47 @@
+@utility border-standard {
+  @apply border border-brand-gray-400;
+}
+
+@utility text-secondary {
+  @apply text-neutral-600;
+}
+
+@utility inter {
+  font-family: var(--font-inter), sans-serif;
+}
+
+@utility title-2xl {
+  @apply text-[4.75rem]/[5.75rem] tracking-tight font-medium max-md:text-[2rem]/[2.5rem];
+}
+
+@utility title-xl {
+  @apply text-[3.5rem]/[3.75rem] font-medium max-md:text-[2rem]/[2.5rem];
+}
+
+@utility title-l {
+  @apply text-[2rem]/[2.5rem] max-md:text-2xl/7 font-medium;
+}
+
+@utility title-m {
+  @apply text-2xl/7 font-medium;
+}
+
+@utility title-s {
+  @apply text-lg/5.5 font-medium;
+}
+
+@utility paragraph-xl {
+  @apply text-2xl/9 max-md:text-xl/7;
+}
+
+@utility paragraph-l {
+  @apply text-lg/8;
+}
+
+@utility shadow-base {
+  @apply shadow-[0_1px_2px_rgba(0,0,0,0.05)];
+}
+
+@utility shadow-l {
+  @apply shadow-[0_4px_32px_rgba(0,0,0,0.16)];
+}

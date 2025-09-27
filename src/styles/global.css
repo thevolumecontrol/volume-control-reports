@@ -1,0 +1,131 @@
+@import "tailwindcss";
+@import "./utilities.css";
+
+@import "./checkbox.css";
+@import "./loader.css";
+@import "./notification.css";
+@import "./tags.css";
+@import "./modal.css";
+
+@theme {
+  --color-brand-gray-900: #222222;
+  --color-brand-gray-800: #777777;
+  --color-brand-gray-600: #bbbab8;
+  --color-brand-gray-500: #cccccc;
+  --color-brand-gray-400: #dedddd;
+  --color-brand-gray-300: #e5e5e5;
+  --color-brand-gray-200: #f6f6f6;
+
+  --color-brand-blue-800: #1c74f9;
+  --color-brand-blue-400: #aec5e7;
+  --color-brand-blue-200: #d3e0f3;
+
+  --color-brand-red-800: #e00000;
+  --color-brand-red-400: #ed9f9f;
+  --color-brand-red-200: #ffdbdb;
+}
+
+/* Global */
+
+@layer base {
+  body {
+    @apply inter text-neutral-900 antialiased transition-all duration-200 ease-in-out h-screen min-h-screen flex flex-col;
+  }
+}
+
+main {
+  @apply flex flex-col flex-grow p-12 relative max-lg:p-4;
+}
+
+.nav-bar {
+  @apply flex items-center border-b border-neutral-200 p-12 max-lg:p-5 h-20 min-h-20 bg-white;
+}
+
+strong {
+  @apply font-semibold;
+}
+
+ul {
+  @apply list-disc list-outside pl-5;
+}
+
+li {
+  @apply pl-2;
+}
+
+blockquote {
+  @apply flex flex-col gap-4 p-5 pt-10 bg-white italic font-medium rounded-lg relative overflow-hidden;
+}
+
+blockquote::before {
+  content: "";
+  @apply absolute left-0 top-0 bottom-0 w-1 bg-neutral-300  pt-40;
+}
+
+blockquote::after {
+  content: "\201C";
+  @apply absolute top-2 left-4 text-6xl text-neutral-400 font-serif;
+}
+
+.rich-text-section {
+  @apply flex flex-col gap-4 paragraph-l;
+}
+
+.rich-text-section a {
+  @apply text-brand-blue-800  cursor-pointer;
+}
+
+/* Global */
+
+/* Misc */
+.divider {
+  @apply border-t border-neutral-400 w-full;
+}
+
+.divider.vertical {
+  @apply border-l border-neutral-400 w-px;
+}
+
+.navigation-cell {
+  @apply flex flex-row items-center gap-2 py-1.5 px-3 w-full text-sm font-medium text-neutral-900 cursor-pointer transition-all hover:bg-neutral-200;
+}
+
+.navigation-cell.no-click {
+  @apply cursor-auto hover:bg-white;
+}
+
+.logo {
+  @apply flex items-center justify-center bg-neutral-200 border-standard overflow-hidden relative text-base font-medium shrink-0;
+}
+
+.logo.s {
+  @apply size-8 rounded-full box-border;
+}
+
+.logo.m {
+  @apply size-16 title-m rounded-2xl;
+}
+
+.logo.l {
+  @apply size-32 text-5xl font-semibold rounded-4xl;
+}
+
+/* Conditional Visibility */
+
+@media (max-width: 768px) {
+  .mobile-hidden {
+    @apply hidden max-md:hidden;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1280px) {
+  .tablet-hidden {
+    @apply hidden;
+  }
+}
+
+@media (min-width: 1281px) {
+  .desktop-hidden {
+    @apply hidden;
+  }
+}
