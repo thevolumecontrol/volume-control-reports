@@ -1,11 +1,15 @@
 "use client";
 import React, { useRef, useState, useEffect } from "react";
 import TableCell from "./table-cell";
+import TableHeaderCell from "./table-header-cell";
 
 /**
  * SimpleTable with resizable columns.
+ *
+ * New prop:
+ * - headerControls: { [headerLabel]: { direction: "asc"|"desc"|null, onToggle: () => void } }
  */
-export default function SimpleTable({ headers: propHeaders, data: propData }) {
+export default function SimpleTable({ headers: propHeaders, data: propData, headerControls = {} }) {
   const headers = propHeaders ?? [];
   const data = propData ?? [];
 
@@ -123,9 +127,18 @@ export default function SimpleTable({ headers: propHeaders, data: propData }) {
                 <th
                   key={i}
                   className="bg-neutral-100 px-4 py-3 border-b border-neutral-200 text-sm font-medium text-neutral-700 text-left relative"
-                  style={{ verticalAlign: "top", minWidth: `${minPercent}%` }}
+                  style={{ verticalAlign: "middle", minWidth: `${minPercent}%` }}
                 >
-                  <div className="overflow-hidden text-ellipsis max-w-full">{h}</div>
+                  {/* Make specific headers tappable (sort UI) - controlled via headerControls */}
+                  {headerControls && headerControls[h] ? (
+                    <TableHeaderCell
+                      label={h}
+                      direction={headerControls[h].direction ?? null}
+                      onToggle={headerControls[h].onToggle}
+                    />
+                  ) : (
+                    <div className="overflow-hidden text-ellipsis max-w-full">{h}</div>
+                  )}
 
                   {i < headers.length - 1 && (
                     <div
@@ -143,10 +156,8 @@ export default function SimpleTable({ headers: propHeaders, data: propData }) {
 
           <tbody>
             {data.map((row, rIdx) => (
-              <tr key={rIdx}>
+              <tr key={rIdx} className={rIdx % 2 === 1 ? "bg-neutral-50" : ""}>
                 {row.map((cellText, cIdx) => (
-                  // pass min width style to td so column cannot grow smaller than minPercent,
-                  // while inner content can overflow and be scrolled horizontally
                   <TableCell key={cIdx} style={{ minWidth: `${minPercent}%` }}>
                     {cellText}
                   </TableCell>

@@ -6,7 +6,7 @@ import { logRequest, logResponse, logError } from "./logger";
 
 export const endpoints = {
   queryStations: "/query_stations",
-  // keep base path; page_id will be appended as query param by getSongs
+  // keep base path; page_id and sortBy will be appended as query params by getSongs
   querySongs: (stationId) => `/query_songs/${encodeURIComponent(stationId)}`,
 };
 
@@ -30,7 +30,8 @@ function setCache(key, payload, ttlMs) {
 async function fetchJson(path, method = "GET", init = {}, opts = {}) {
   const url = `${BASE}${path.startsWith("/") ? path : `/${path}`}`;
   const m = method.toUpperCase();
-  const start = logRequest(m, url);
+  // pass init so logger can print request body / query params
+  const start = logRequest(m, url, init);
 
   // opts.cacheTTL is in seconds
   const cacheTTLsec = Number(opts.cacheTTL || 0);
@@ -96,14 +97,24 @@ export async function getStations() {
 }
 
 /**
- * getSongs(stationId, pageId)
- * - passes page_id as query parameter to the endpoint
+ * getSongs(stationId, pageId, sortBy)
+ * - passes page_id and optional sortBy as query parameters to the endpoint
  * - cached for 60 minutes (3600 seconds)
  * - returns { items: [...normalized songs...], meta: { curPage, nextPage, prevPage, pageTotal, itemsTotal } }
+ *
+ * sortBy allowed values:
+ * - playCountDecrease
+ * - playCountIncrease
+ * - lastPlayedDecrease
+ * - lastPlayedIncrease
  */
-export async function getSongs(stationId, pageId = 1) {
+export async function getSongs(stationId, pageId = 1, sortBy = null) {
   const basePath = endpoints.querySongs(stationId);
-  const pathWithQuery = `${basePath}?page_id=${encodeURIComponent(String(pageId))}`;
+  const params = new URLSearchParams();
+  params.set("page_id", String(pageId));
+  if (sortBy) params.set("sortBy", String(sortBy));
+  const pathWithQuery = `${basePath}?${params.toString()}`;
+
   const json = await fetchJson(pathWithQuery, "GET", {}, { cacheTTL: 60 * 60 });
 
   const meta = {

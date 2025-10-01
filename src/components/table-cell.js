@@ -4,7 +4,8 @@ import React from "react";
 export default function TableCell({ children, className = "", onClick, style = {} }) {
   return (
     <td
-      className={`bg-white hover:bg-neutral-50 px-4 py-3 border-b border-neutral-200 text-sm text-neutral-800 overflow-hidden ${className}`}
+      // removed border-b so row separators are not shown (headers keep their border)
+      className={`bg-transparent hover:bg-neutral-100 px-4 py-3 text-sm text-neutral-800 overflow-hidden ${className}`}
       onClick={onClick}
       style={style}
     >
