@@ -6,9 +6,10 @@
 @import "./notification.css";
 @import "./tags.css";
 @import "./modal.css";
+@import "./dropdown.css";
 
 @theme {
-  --color-brand-gray-900: #222222;
+  --color-brand-gray-900: #22222q2;
   --color-brand-gray-800: #777777;
   --color-brand-gray-600: #bbbab8;
   --color-brand-gray-500: #cccccc;
