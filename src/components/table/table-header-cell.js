@@ -7,29 +7,31 @@ import React from "react";
  * - direction: "asc" | "desc" | null   // controlled prop
  * - onToggle: () => void               // called when user clicks (parent handles toggling logic)
  *
- * Visuals:
- * - when direction === "asc" shows up arrow
- * - when direction === "desc" shows down arrow
- * - when direction === null shows placeholder
- * - hover: light gray background (handled by parent class)
+ * Uses external SVGs for sort icons (public/images/sortInc.svg, sortDec.svg)
  */
 export default function TableHeaderCell({ label, direction = null, onToggle = () => {} }) {
   const Icon = () => {
     if (direction === "asc") {
       return (
-        <svg className="w-4 h-4 text-neutral-700" viewBox="0 0 24 24" fill="none" aria-hidden>
-          <path d="M6 15l6-6 6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+        <img
+          src="/images/sortInc.svg"
+          alt="sort ascending"
+          className="w-4 h-4"
+          aria-hidden="true"
+        />
       );
     }
     if (direction === "desc") {
       return (
-        <svg className="w-4 h-4 text-neutral-700" viewBox="0 0 24 24" fill="none" aria-hidden>
-          <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+        <img
+          src="/images/sortDec.svg"
+          alt="sort descending"
+          className="w-4 h-4"
+          aria-hidden="true"
+        />
       );
     }
-    // null: placeholder to keep alignment
+    // null: placeholder with same width as icon so label stays aligned to icon column
     return <span className="w-4 h-4 inline-block" aria-hidden />;
   };
 

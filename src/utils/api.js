@@ -109,10 +109,16 @@ export async function getStations() {
  * - lastPlayedIncrease
  */
 export async function getSongs(stationId, pageId = 1, sortBy = null) {
+  // optional searchInput appended as query param
   const basePath = endpoints.querySongs(stationId);
   const params = new URLSearchParams();
   params.set("page_id", String(pageId));
   if (sortBy) params.set("sortBy", String(sortBy));
+  // support fourth param (searchInput)
+  const searchInput = arguments.length >= 4 ? arguments[3] : null;
+  if (searchInput != null && String(searchInput).trim() !== "") {
+    params.set("search_input", String(searchInput));
+  }
   const pathWithQuery = `${basePath}?${params.toString()}`;
 
   const json = await fetchJson(pathWithQuery, "GET", {}, { cacheTTL: 60 * 60 });
