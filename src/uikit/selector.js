@@ -100,7 +100,7 @@ export default function Selector({
       <div className="relative">
         <Dropdown
           toggleContent={toggleContent}
-          dropdownSize="auto"
+          dropdownSize="m"
           dropdownOrientation="bottom"
           horizontalPosition="left"
         >
