@@ -9,7 +9,7 @@ import TableHeaderCell from "./table-header-cell";
  * New prop:
  * - headerControls: { [headerLabel]: { direction: "asc"|"desc"|null, onToggle: () => void } }
  */
-export default function SimpleTable({ headers: propHeaders, data: propData, headerControls = {} }) {
+export default function SimpleTable({ headers: propHeaders, data: propData, headerControls = {}, searchTerm = "" }) {
   const headers = propHeaders ?? [];
   const data = propData ?? [];
 
@@ -18,10 +18,10 @@ export default function SimpleTable({ headers: propHeaders, data: propData, head
   const defaultMap = {
     Title: 30,
     Artist: 30,
+    "Last played": 12.5,
+    "Played Total": 12.5, // was "Playing counts"
     Genre: 10,
     ISRC: 5,
-    "Playing counts": 12.5,
-    "Last played": 12.5,
   };
 
   const initialWidths = (() => {
@@ -156,9 +156,12 @@ export default function SimpleTable({ headers: propHeaders, data: propData, head
 
           <tbody>
             {data.map((row, rIdx) => (
-              <tr key={rIdx} className={rIdx % 2 === 1 ? "bg-neutral-50" : ""}>
+              <tr
+                key={rIdx}
+                className={`${rIdx % 2 === 1 ? "bg-neutral-50" : ""} hover:bg-neutral-100`}
+              >
                 {row.map((cellText, cIdx) => (
-                  <TableCell key={cIdx} style={{ minWidth: `${minPercent}%` }}>
+                  <TableCell key={cIdx} style={{ minWidth: `${minPercent}%` }} highlight={searchTerm}>
                     {cellText}
                   </TableCell>
                 ))}

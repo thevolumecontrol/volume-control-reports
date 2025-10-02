@@ -1,15 +1,17 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import Selector from "@/uikit/selector";
-import SimpleTable from "@/components/table";
-import Pagination from "@/components/pagination";
-import PageNav from "@/components/page-nav";
+import SearchBar from "@/components/search-bar";
+import SimpleTable from "@/components/table/table";
+import Pagination from "@/components/table/navigation/pagination";
+import PageNav from "@/components/table/navigation/page-nav";
 import { getStations, getSongs } from "@/utils/api";
 import styles from "@/styles/page-wrapper.module.css";
 
 export default function PageWrapper() {
   const [station, setStation] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   const [stations, setStations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -71,6 +73,20 @@ export default function PageWrapper() {
     // keep sort state as is (countsDir default remains)
   }, [station]);
 
+  // called from SearchBar (debounced)
+  // memoize handler so its identity is stable -> prevents SearchBar's effect
+  // from re-triggering when other state changes (this was causing extra requests).
+  const handleSearchInput = useCallback(
+    (text) => {
+      setSearchInput(text ?? "");
+      // when user types, apply default sort: Played Total desc
+      setCountsDir("desc");
+      setLastPlayedDir(null);
+      setCurrentPage(1);
+    },
+    []
+  );
+
   // derive sortBy string from header state
   const getSortByForRequest = () => {
     if (countsDir) {
@@ -97,7 +113,7 @@ export default function PageWrapper() {
       setFilesError(null);
       try {
         const sortBy = getSortByForRequest();
-        const { items, meta } = await getSongs(station, currentPage, sortBy);
+        const { items, meta } = await getSongs(station, currentPage, sortBy, searchInput);
         if (mounted) {
           setFiles(items);
           setCurrentPage(meta.curPage ?? currentPage);
@@ -117,35 +133,43 @@ export default function PageWrapper() {
     return () => {
       mounted = false;
     };
-    // include sort state in deps so change triggers reload
-  }, [station, currentPage, countsDir, lastPlayedDir]);
+    // include sort state and searchInput in deps so change triggers reload
+  }, [station, currentPage, countsDir, lastPlayedDir, searchInput]);
 
   const options = stations; // { label, value }[] from utils
 
-  // table columns: title | artist | genre | isrc | playing counts | last played
-  const tableHeaders = ["Title", "Artist", "Genre", "ISRC", "Playing counts", "Last played"];
+  // table columns: Title, Artist, Last Played, Played Total, Genre, ISRC
+  const tableHeaders = ["Title", "Artist", "Last played", "Played Total", "Genre", "ISRC"];
   const tableData =
     files.length > 0
       ? files.map((f) => [
           f.title,
           f.artist,
-          f.genre,
-          f.isrc,
-          String(f.counts_all_time ?? 0),
+          // formatted last played with time: "Sep 10, 2025, 3:13:08 AM"
           (() => {
             const v = f.last_played_at;
             if (v == null) return "-";
-            // support both seconds and milliseconds timestamps and ISO/date strings
             let date;
             if (typeof v === "number") {
-              // if looks like milliseconds (large), use as is; otherwise treat as seconds
               date = v > 1e12 ? new Date(v) : new Date(v * 1000);
             } else {
               date = new Date(v);
             }
             if (isNaN(date.getTime())) return "-";
-            return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+            return date.toLocaleString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+              hour: "numeric",
+              minute: "2-digit",
+              second: "2-digit",
+              hour12: true,
+            });
           })(),
+          // Played Total (counts)
+          String(f.counts_all_time ?? 0),
+          f.genre,
+          f.isrc,
         ])
       : Array.from({ length: 10 }, () => [" ", " ", " ", " ", " ", " "]);
 
@@ -186,7 +210,7 @@ export default function PageWrapper() {
   // header toggle handler: toggles clicked header, resets the other to null,
   // and resets page to 1 (triggers fetch via effect)
   const handleHeaderToggle = (headerLabel) => {
-    if (headerLabel === "Playing counts") {
+    if (headerLabel === "Played Total") {
       // if already active, toggle direction; otherwise set to 'desc' by default
       setCountsDir((prev) => (prev === "desc" ? "asc" : prev === "asc" ? "desc" : "desc"));
       setLastPlayedDir(null);
@@ -200,9 +224,9 @@ export default function PageWrapper() {
 
   // header controls to pass into SimpleTable
   const headerControls = {
-    "Playing counts": {
+    "Played Total": {
       direction: countsDir,
-      onToggle: () => handleHeaderToggle("Playing counts"),
+      onToggle: () => handleHeaderToggle("Played Total"),
     },
     "Last played": {
       direction: lastPlayedDir,
@@ -215,30 +239,39 @@ export default function PageWrapper() {
       <div ref={wrapperRef} className="p-4 flex flex-col gap-4">
         {error ? <div className="text-sm text-red-500">Error: {error}</div> : null}
 
-        {/* Row: selector left, pagination right */}
-        <div className="flex items-center justify-between gap-4">
-          {/* selector gets shimmer while stations are loading */}
-          <div className={`flex-1 ${loading ? `${styles.loadingShimmer} rounded-md` : ""}`}>
-            <Selector
-               value={station}
-               onChange={setStation}
-               options={options}
-               placeholder="Choose a station"
-              className="text-[1.4rem] py-3 h-14"
-             />
+        {/* Row: selector left, search (now closer) and pagination right */}
+        <div className="flex items-end justify-between gap-4">
+          {/* left group: selector + search, aligned to left */}
+          <div className="flex items-end gap-3">
+            {/* left: selector (fixed width similar to pagination) */}
+            <div className={`flex-none w-56 ${loading ? `${styles.loadingShimmer} rounded-md` : ""}`}>
+              <Selector
+                value={station}
+                onChange={setStation}
+                options={options}
+                placeholder="Choose a station"
+                className="text-[1.4rem] py-3 h-14"
+              />
+            </div>
+
+            {/* search moved closer and made longer */}
+            <div className="flex-none w-96">
+              <SearchBar onSearch={handleSearchInput} />
+            </div>
           </div>
-  
-           <div className="ml-4">
-             <Pagination
-               onPrev={handlePrev}
-               onNext={handleNext}
-               disabledPrev={prevPage == null}
-               disabledNext={nextPage == null}
-               currentPage={currentPage}
-               totalPages={totalPages}
-             />
-           </div>
-         </div>
+
+          {/* right: pagination */}
+          <div className="ml-4">
+            <Pagination
+              onPrev={handlePrev}
+              onNext={handleNext}
+              disabledPrev={prevPage == null}
+              disabledNext={nextPage == null}
+              currentPage={currentPage}
+              totalPages={totalPages}
+            />
+          </div>
+        </div>
 
         {filesError && <div className="text-sm text-red-500">Files error: {filesError}</div>}
 
@@ -248,7 +281,12 @@ export default function PageWrapper() {
             <div>
               <div className={(filesLoading || loading) ? `${styles.loadingShimmer} rounded-md` : ""}>
                 <div className={styles.tableAppear}>
-                  <SimpleTable headers={tableHeaders} data={tableData} headerControls={headerControls} />
+                  <SimpleTable
+                    headers={tableHeaders}
+                    data={tableData}
+                    headerControls={headerControls}
+                    searchTerm={searchInput}
+                  />
                 </div>
               </div>
             </div>

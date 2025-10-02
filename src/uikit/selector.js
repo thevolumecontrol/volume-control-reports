@@ -16,12 +16,10 @@ export default function Selector({
   multiSelect = false,
   maxSelections = null,
 }) {
-  const selectorStyles = `input cursor-pointer  ${
-    error ? "border-red-400 ring-red-400" : ""
-  }`;
+  const selectorStyles = `${error ? "border-red-400 ring-red-400" : ""}`;
 
   // Support options as array of objects { label, value } or as strings
-  const normalizedOptions = options.map((option) =>
+  const normalizedOptions = (options || []).map((option) =>
     typeof option === "object"
       ? { label: option.label, value: option.value }
       : { label: option, value: option }
@@ -72,14 +70,19 @@ export default function Selector({
   const toggleContent = (
     <button
       type="button"
-      className={`${selectorStyles} text-left flex items-center justify-between`}
+      className={`${selectorStyles} w-full rounded-md px-3 h-10 flex items-center gap-2 transition-colors
+                   bg-neutral-100 hover:bg-neutral-200 focus-within:bg-neutral-100 text-left text-neutral-700`}
     >
-      {!multiSelect && displayValue() ? (
-        displayValue()
-      ) : (
-        <span className="text-neutral-400">{placeholder}</span>
-      )}
-      <DownIcon size={20} className="transition-transform duration-200" />
+      <div className="truncate flex-1">
+        {!multiSelect && displayValue() ? (
+          <span className="truncate">{displayValue()}</span>
+        ) : (
+          <span className="text-neutral-400 truncate">{placeholder}</span>
+        )}
+      </div>
+      <div className="flex-none ml-2">
+        <DownIcon size={18} className="text-neutral-500" />
+      </div>
     </button>
   );
 

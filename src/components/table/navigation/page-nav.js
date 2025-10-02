@@ -49,7 +49,7 @@ export default function PageNav({ currentPage = 1, totalPages = 1, onChange = ()
   }
 
   const itemClass =
-    "inline-flex items-center justify-center px-3 py-1 rounded-md text-sm font-medium border border-neutral-200 transition-colors";
+    "inline-flex items-center justify-center px-3 py-1 rounded-md text-sm font-medium border border-neutral-200 transition-colors cursor-pointer";
   // no default background; hover shows light gray
   const baseClass = "text-neutral-700 hover:bg-neutral-200 hover:text-black";
   // active: darker text + slightly bolder, keep light-gray background for current page
