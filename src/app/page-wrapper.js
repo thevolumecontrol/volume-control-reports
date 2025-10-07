@@ -7,7 +7,10 @@ import SimpleTable from "@/components/table/table";
 import Pagination from "@/components/table/navigation/pagination";
 import PageNav from "@/components/table/navigation/page-nav";
 import { getStations, getSongs } from "@/utils/api";
+import { formatDate } from "@/utils/date-formatter";
 import styles from "@/styles/page-wrapper.module.css";
+import ContactCTA from "@/components/modals/contact-us";
+import PaymentSuccessModal from "@/components/modals/payment-success";
 
 export default function PageWrapper() {
   const [station, setStation] = useState("");
@@ -138,40 +141,28 @@ export default function PageWrapper() {
 
   const options = stations; // { label, value }[] from utils
 
-  // table columns: Title, Artist, Last Played, Played Total, Genre, ISRC
-  const tableHeaders = ["Title", "Artist", "Last played", "Played Total", "Genre", "ISRC"];
+  // table columns: Title, Artist, Last Played, Played Total, Genre, ISRC (spans 2 cols), <action>
+  // note: we add an extra blank header at the end so ISRC can be rendered spanning 2 cols
+  const tableHeaders = ["Title", "Artist", "Last played", "Played Total", "Genre", "ISRC", ""];
+  // For the action column we pass an object so the table can open modal with full song info
   const tableData =
     files.length > 0
       ? files.map((f) => [
           f.title,
           f.artist,
-          // formatted last played with time: "Sep 10, 2025, 3:13:08 AM"
-          (() => {
-            const v = f.last_played_at;
-            if (v == null) return "-";
-            let date;
-            if (typeof v === "number") {
-              date = v > 1e12 ? new Date(v) : new Date(v * 1000);
-            } else {
-              date = new Date(v);
-            }
-            if (isNaN(date.getTime())) return "-";
-            return date.toLocaleString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-              hour: "numeric",
-              minute: "2-digit",
-              second: "2-digit",
-              hour12: true,
-            });
-          })(),
+          formatDate(f.last_played_at),
           // Played Total (counts)
           String(f.counts_all_time ?? 0),
           f.genre,
           f.isrc,
+          // last column: payload with song info (id/title/artist)
+          {
+            songId: f._raw?.song?.id ?? f.id ?? f.song_id ?? "",
+            title: f.title ?? f._raw?.song?.title ?? "",
+            artist: f.artist ?? f._raw?.song?.artist ?? "",
+          },
         ])
-      : Array.from({ length: 10 }, () => [" ", " ", " ", " ", " ", " "]);
+      : Array.from({ length: 10 }, () => [" ", " ", " ", " ", " ", " ", { songId: "", title: "", artist: "" }]);
 
   // pagination handlers use API-provided nextPage/prevPage values
   const handlePrev = () => {
@@ -300,6 +291,12 @@ export default function PageWrapper() {
            <PageNav currentPage={currentPage} totalPages={totalPages} onChange={handlePageChange} />
          </div>
        </div>
+
+      {/* contact button / modal (fixed bottom-right) */}
+      <ContactCTA />
+
+     {/* payment success modal (opens when URL hash === #success) */}
+     <PaymentSuccessModal />
     </>
   );
 }

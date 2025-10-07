@@ -2,6 +2,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import TableCell from "./table-cell";
 import TableHeaderCell from "./table-header-cell";
+import GetFullReportButton from "@/uikit/get-full-report-button";
 
 /**
  * SimpleTable with resizable columns.
@@ -16,12 +17,13 @@ export default function SimpleTable({ headers: propHeaders, data: propData, head
   const tableRef = useRef(null);
 
   const defaultMap = {
-    Title: 30,
-    Artist: 30,
-    "Last played": 12.5,
-    "Played Total": 12.5, // was "Playing counts"
+    Title: 27.5,
+    Artist: 22.5,
+    "Last played": 17.5,
+    "Played Total": 10, // was "Playing counts"
     Genre: 10,
     ISRC: 5,
+    "": 7.5, // width for added action column (empty header)
   };
 
   const initialWidths = (() => {
@@ -123,34 +125,75 @@ export default function SimpleTable({ headers: propHeaders, data: propData, head
 
           <thead>
             <tr>
-              {headers.map((h, i) => (
-                <th
-                  key={i}
-                  className="bg-neutral-100 px-4 py-3 border-b border-neutral-200 text-sm font-medium text-neutral-700 text-left relative"
-                  style={{ verticalAlign: "middle", minWidth: `${minPercent}%` }}
-                >
-                  {/* Make specific headers tappable (sort UI) - controlled via headerControls */}
-                  {headerControls && headerControls[h] ? (
-                    <TableHeaderCell
-                      label={h}
-                      direction={headerControls[h].direction ?? null}
-                      onToggle={headerControls[h].onToggle}
-                    />
-                  ) : (
-                    <div className="overflow-hidden text-ellipsis max-w-full">{h}</div>
-                  )}
+              {/* render headers, but make "ISRC" span two columns (colSpan=2) */}
+              {(() => {
+                const ths = [];
+                for (let i = 0; i < headers.length; i++) {
+                  const h = headers[i];
+                  if (h === "ISRC") {
+                    // render ISRC spanning two columns (skip next header)
+                    ths.push(
+                      <th
+                        key={i}
+                        colSpan={2}
+                        className="bg-neutral-100 px-4 py-3 border-b border-neutral-200 text-sm font-medium text-neutral-700 text-left relative"
+                        style={{ verticalAlign: "middle", minWidth: `${minPercent}%` }}
+                      >
+                        {headerControls && headerControls[h] ? (
+                          <TableHeaderCell
+                            label={h}
+                            direction={headerControls[h].direction ?? null}
+                            onToggle={headerControls[h].onToggle}
+                          />
+                        ) : (
+                          <div className="overflow-hidden text-ellipsis max-w-full">{h}</div>
+                        )}
 
-                  {i < headers.length - 1 && (
-                    <div
-                      onMouseDown={(e) => startResize(e, i)}
-                      className="absolute right-0 top-0 h-full w-2 -mr-1 cursor-col-resize z-10"
-                      style={{ touchAction: "none" }}
+                        {i < headers.length - 1 && (
+                          <div
+                            onMouseDown={(e) => startResize(e, i)}
+                            className="absolute right-0 top-0 h-full w-2 -mr-1 cursor-col-resize z-10"
+                            style={{ touchAction: "none" }}
+                          >
+                            <div className="h-full w-0.5 bg-neutral-200 mx-auto" />
+                          </div>
+                        )}
+                      </th>
+                    );
+                    i++; // skip next (the extra action column) because ISRC spans it
+                    continue;
+                  }
+
+                  ths.push(
+                    <th
+                      key={i}
+                      className="bg-neutral-100 px-4 py-3 border-b border-neutral-200 text-sm font-medium text-neutral-700 text-left relative"
+                      style={{ verticalAlign: "middle", minWidth: `${minPercent}%` }}
                     >
-                      <div className="h-full w-0.5 bg-neutral-200 mx-auto" />
-                    </div>
-                  )}
-                </th>
-              ))}
+                      {headerControls && headerControls[h] ? (
+                        <TableHeaderCell
+                          label={h}
+                          direction={headerControls[h].direction ?? null}
+                          onToggle={headerControls[h].onToggle}
+                        />
+                      ) : (
+                        <div className="overflow-hidden text-ellipsis max-w-full">{h}</div>
+                      )}
+
+                      {i < headers.length - 1 && (
+                        <div
+                          onMouseDown={(e) => startResize(e, i)}
+                          className="absolute right-0 top-0 h-full w-2 -mr-1 cursor-col-resize z-10"
+                          style={{ touchAction: "none" }}
+                        >
+                          <div className="h-full w-0.5 bg-neutral-200 mx-auto" />
+                        </div>
+                      )}
+                    </th>
+                  );
+                }
+                return ths;
+              })()}
             </tr>
           </thead>
 
@@ -158,13 +201,36 @@ export default function SimpleTable({ headers: propHeaders, data: propData, head
             {data.map((row, rIdx) => (
               <tr
                 key={rIdx}
-                className={`${rIdx % 2 === 1 ? "bg-neutral-50" : ""} hover:bg-neutral-100`}
+                // make row positioned so absolute button inside can be positioned relative to row
+                className={`${rIdx % 2 === 1 ? "bg-neutral-50" : ""} hover:bg-neutral-100 group relative`}
               >
-                {row.map((cellText, cIdx) => (
-                  <TableCell key={cIdx} style={{ minWidth: `${minPercent}%` }} highlight={searchTerm}>
-                    {cellText}
-                  </TableCell>
-                ))}
+                {row.map((cellText, cIdx) => {
+                  const isActionCol = cIdx === headers.length - 1;
+                  return (
+                    // allow this cell to expose overflow so the absolute button can overlap neighbors
+                    <TableCell
+                      key={cIdx}
+                      style={{ minWidth: `${minPercent}%` }}
+                      highlight={searchTerm}
+                      innerOverflowVisible={isActionCol}
+                    >
+                      {isActionCol ? (
+                        // position button absolutely within the row (so it can overlap adjacent cells)
+                        <div className="relative overflow-visible w-full h-full">
+                          <GetFullReportButton
+                            id={cellText}
+                            onClick={(id) => {
+                              console.log("Get full report for id:", id);
+                            }}
+                            className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 opacity-0 group-hover:opacity-100 transition-opacity"
+                          />
+                        </div>
+                      ) : (
+                        cellText
+                      )}
+                    </TableCell>
+                  );
+                })}
               </tr>
             ))}
           </tbody>
