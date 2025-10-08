@@ -27,12 +27,11 @@ export default function ContactCTA() {
   const [messageInputError, setMessageInputError] = useState(false);
 
   const topicOptions = [
-    "Song report",
-    "Data Edit / Removal",
-    "Feature Request",
+    "General Inquiry",
     "Bug Report",
-    "Support",
-    "Other",
+    "Feature Request",
+    "Song Report Access",
+    "Payment Problem",
   ];
 
   const handleSubmit = async (e) => {

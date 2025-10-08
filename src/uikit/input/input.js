@@ -1,63 +1,70 @@
 "use client";
-import React, { useId } from "react";
+import { useRef, useEffect } from "react";
 
 export default function Input({
-  type = "plain", // "plain" | "textarea"
+  name,
+  type = "text",
   label,
   value,
-  onChange = () => {},
-  onFocus = () => {},
-  onBlur = () => {},
-  error = false,
+  onChange,
+  onFocus,
+  onKeyPress,
+  autoComplete,
   required = false,
-  placeholder = "",
-  className = "",
-  name,
+  optional = false,
+  error = false,
+  visible = true,
+  placeholder,
 }) {
-  const id = useId();
+  const textareaRef = useRef(null);
 
-  const baseWrapper =
-    "w-full flex flex-col gap-2 text-sm font-normal";
-  const fieldWrapper = `rounded-md transition-colors ${
-    error ? "border border-red-400" : "border border-neutral-200"
-  } bg-neutral-100 hover:bg-neutral-200 focus-within:bg-neutral-100 ${className}`;
+  useEffect(() => {
+    if (type === "textarea" && textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  }, [value, type]);
 
-  const commonProps = {
-    id,
-    name,
-    value,
-    onChange,
-    onFocus,
-    onBlur,
-    placeholder,
-    "aria-invalid": !!error,
-    className:
-      "bg-transparent outline-none w-full text-[1rem] text-neutral-700 placeholder:text-neutral-400",
-  };
+  const inputStyles = `input ${error ? "border-red-400 ring-red-400" : ""}`;
 
   return (
-    <div className={baseWrapper}>
+    <div className={`flex flex-col gap-2 ${visible ? "" : "hidden"}`}>
       {label && (
-        <label htmlFor={id} className={`${error ? "text-red-600" : "text-neutral-700"}`}>
-          {label} {required && <span className="text-red-600">*</span>}
-        </label>
+        <p className="input-label">
+          {label}
+          {optional && (
+            <span className="text-xs text-secondary"> (Optional)</span>
+          )}
+        </p>
       )}
-
-      {type === "textarea" ? (
-        <div className={`${fieldWrapper} px-3 py-2`}>
+      <div className="relative">
+        {type === "textarea" ? (
           <textarea
-            rows={6}
-            {...commonProps}
-            className={`${commonProps.className} min-h-[6rem] resize-y`}
+            ref={textareaRef}
+            name={name}
+            value={value}
+            onChange={onChange}
+            onFocus={onFocus}
+            required={required}
+            placeholder={placeholder}
+            className={`${inputStyles} resize-none overflow-hidden`}
+            rows={3}
           />
-        </div>
-      ) : (
-        <div className={`${fieldWrapper} px-3 h-10 flex items-center`}>
-          <input type="text" {...commonProps} />
-        </div>
-      )}
-
-      {error && <div className="text-xs text-red-500">This field is required</div>}
+        ) : (
+          <input
+            type={type}
+            name={name}
+            value={value}
+            autoComplete={autoComplete}
+            onChange={onChange}
+            onFocus={onFocus}
+            onKeyPress={onKeyPress}
+            required={required}
+            placeholder={placeholder}
+            className={`input ${error ? "border-red-400 ring-red-400" : ""}`}
+          />
+        )}
+      </div>
     </div>
   );
 }

@@ -2,6 +2,7 @@
 import Dropdown from "./dropdown/dropdown";
 import IconCheckSimple from "@/uikit/icons/check-simple";
 import DownIcon from "@/uikit/icons/down";
+import "./input/input.css";
 
 export default function Selector({
   label,
@@ -15,7 +16,7 @@ export default function Selector({
   multiSelect = false,
   maxSelections = null,
 }) {
-  const selectorStyles = `${error ? "border-red-400 ring-red-400" : ""}`;
+  const selectorStyles = `input ${error ? "border-red-400 ring-red-400" : ""}`;
 
   const normalizedOptions = (options || []).map((option) =>
     typeof option === "object"
@@ -68,10 +69,9 @@ export default function Selector({
   const toggleContent = (
     <button
       type="button"
-      className={`${selectorStyles} w-full rounded-md px-3 h-10 flex items-center gap-2 transition-colors
-                   bg-neutral-100 hover:bg-neutral-200 focus-within:bg-neutral-100 text-left text-neutral-700`}
+      className={`${selectorStyles} cursor-pointer flex items-center gap-2 justify-between`}
     >
-      <div className="truncate flex-1">
+      <div className="truncate">
         {!multiSelect && displayValue() ? (
           <span className="truncate">{displayValue()}</span>
         ) : (
@@ -86,7 +86,7 @@ export default function Selector({
 
   return (
     <div className={`flex flex-col gap-2 ${visible ? "" : "hidden"}`}>
-      <label className="input-labe text-sm">
+      <label className="input-label">
         {label}
         {optional && (
           <span className="text-xs text-neutral-800"> (Optional)</span>

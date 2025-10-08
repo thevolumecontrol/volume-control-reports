@@ -1,7 +1,11 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
+import SearchIcon from "@/uikit/icons/search";
 
-export default function SearchBar({ placeholder = "Search...", onSearch = null }) {
+export default function SearchBar({
+  placeholder = "Search...",
+  onSearch = null,
+}) {
   const [value, setValue] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef(null);
@@ -26,8 +30,9 @@ export default function SearchBar({ placeholder = "Search...", onSearch = null }
   return (
     <div
       // when focused -> do NOT apply hover darkening; otherwise allow hover:bg-neutral-200
-      className={`w-full max-w-xl h-10 rounded-md px-3 flex items-center gap-2 transition-colors
-                 bg-neutral-100 ${!isFocused ? "hover:bg-neutral-200" : ""} focus-within:bg-neutral-100`}
+      className={`w-full max-w-xl h-10.5 rounded-md px-3 flex items-center gap-2 shadow-base border-standard transition-colors ${
+        !isFocused ? "hover:bg-neutral-200" : ""
+      } focus-within:bg-neutral-100`}
       aria-hidden="false"
       onClick={() => {
         // clicking wrapper focuses input
@@ -36,15 +41,9 @@ export default function SearchBar({ placeholder = "Search...", onSearch = null }
         } catch {}
       }}
     >
-      <svg
-        className="w-4 h-4 text-neutral-500 flex-none"
-        viewBox="0 0 24 24"
-        fill="none"
-        aria-hidden="true"
-      >
-        <path d="M21 21l-4.35-4.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        <circle cx="11" cy="11" r="6" stroke="currentColor" strokeWidth="2" fill="none"/>
-      </svg>
+      <div className="text-neutral-500">
+        <SearchIcon size={18} />
+      </div>
 
       <input
         ref={inputRef}
@@ -66,9 +65,26 @@ export default function SearchBar({ placeholder = "Search...", onSearch = null }
           onClick={handleClear}
           className="flex-none rounded-md p-1 hover:bg-neutral-200 transition-colors cursor-pointer"
         >
-          <svg className="w-4 h-4 text-neutral-600" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            <path d="M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          <svg
+            className="w-4 h-4 text-neutral-600"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M18 6L6 18"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M6 6L18 18"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         </button>
       )}

@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+.input {
+  @apply w-full border-standard py-2 px-3 text-base/6 rounded-md shadow-base hover:shadow-[0_2px_4px_rgba(0,0,0,0.10)] placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-[#C2D9FC] focus:border-blue-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none;
+}
+
+.input-label {
+  @apply text-lg font-medium;
+}

@@ -5,6 +5,7 @@
 @import "../providers/notification/notification.css";
 @import "../uikit/modal/modal.css";
 @import "../uikit/dropdown/dropdown.css";
+@import "../uikit/input/input.css";
 
 /* Global */
 
@@ -60,11 +61,11 @@ blockquote::after {
 
 /* Misc */
 .divider {
-  @apply border-t border-neutral-400 w-full;
+  @apply border-t border-neutral-300 w-full;
 }
 
 .divider.vertical {
-  @apply border-l border-neutral-400 w-px;
+  @apply border-l border-neutral-300 w-px;
 }
 
 .navigation-cell {
