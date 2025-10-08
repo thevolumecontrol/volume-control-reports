@@ -1,5 +1,5 @@
 @utility border-standard {
-  @apply border border-brand-gray-400;
+  @apply border border-neutral-300;
 }
 
 @utility text-secondary {

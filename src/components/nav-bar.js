@@ -7,7 +7,7 @@ export default function NavBar() {
     <nav className="nav-bar">
       <Link href="/">
         <Image
-          src="/images/volume-control-logo.png"
+          src="/volume-control-logo.png"
           alt="Volume Control Logo"
           width={100}
           height={40}

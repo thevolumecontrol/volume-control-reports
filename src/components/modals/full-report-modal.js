@@ -1,16 +1,22 @@
 "use client";
 import React, { useState, useMemo } from "react";
-import Modal from "@/uikit/modal";
-import Input from "@/uikit/input";
-import Button from "@/uikit/button";
-import { useNotification } from "@/providers/notifications";
+import Modal from "@/uikit/modal/modal";
+import Input from "@/uikit/input/input";
+import Button from "@/uikit/button/button";
+import { useNotification } from "@/providers/notification/notifications";
 import { formatDateShort } from "@/utils/date-formatter";
 import { isEmail } from "@/utils/validators";
 import { createStripeCheckout } from "@/utils/api";
 
 const REPORT_DAYS = 28;
 
-export default function FullReportModal({ isOpen, onClose, songId, title, artist }) {
+export default function FullReportModal({
+  isOpen,
+  onClose,
+  songId,
+  title,
+  artist,
+}) {
   const [email, setEmail] = useState("");
   // emailError holds error message or empty string
   const [emailError, setEmailError] = useState("");
@@ -23,7 +29,10 @@ export default function FullReportModal({ isOpen, onClose, songId, title, artist
     end.setDate(end.getDate() - 1); // yesterday
     const start = new Date(end);
     start.setDate(end.getDate() - (REPORT_DAYS - 1)); // inclusive 28 days ending yesterday
-    return { startDateStr: formatDateShort(start), endDateStr: formatDateShort(end) };
+    return {
+      startDateStr: formatDateShort(start),
+      endDateStr: formatDateShort(end),
+    };
   }, []);
 
   const isEmailValid = (value) => {
@@ -46,7 +55,10 @@ export default function FullReportModal({ isOpen, onClose, songId, title, artist
     setLoading(true);
     try {
       // call checkout creation endpoint with song id and customer email
-      const resp = await createStripeCheckout(String(songId ?? ""), String(email));
+      const resp = await createStripeCheckout(
+        String(songId ?? ""),
+        String(email)
+      );
 
       // robust redirect detection:
       // - accept string response
@@ -104,13 +116,20 @@ export default function FullReportModal({ isOpen, onClose, songId, title, artist
   };
 
   return (
-    <Modal isOpen={!!isOpen} onClose={onClose} title="Full song report" size="m">
+    <Modal
+      isOpen={!!isOpen}
+      onClose={onClose}
+      title="Full song report"
+      size="m"
+    >
       <div className="flex flex-col gap-4">
         <div className="text-xl text-neutral-700">
           <div className="font-medium">
             {title || songId} {artist ? ` — ${artist}` : ""}
           </div>
-          <div className="text-sm text-neutral-500 mt-1">Report period: {REPORT_DAYS} days</div>
+          <div className="text-sm text-neutral-500 mt-1">
+            Report period: {REPORT_DAYS} days
+          </div>
           <div className="text-sm text-neutral-500">{`Report dates: ${startDateStr} – ${endDateStr}`}</div>
         </div>
 
@@ -138,7 +157,9 @@ export default function FullReportModal({ isOpen, onClose, songId, title, artist
           />
 
           {/* inline error line (instead of notification) */}
-          {emailError && <div className="text-sm text-red-500">{emailError}</div>}
+          {emailError && (
+            <div className="text-sm text-red-500">{emailError}</div>
+          )}
 
           <Button
             type="submit"

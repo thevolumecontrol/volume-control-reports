@@ -1,16 +1,26 @@
 "use client";
 import React, { useState } from "react";
 import FullReportModal from "@/components/modals/full-report-modal";
-import Button from "@/uikit/button";
+import Button from "@/uikit/button/button";
 
-export default function GetFullReportButton({ id, onClick, className = "", title, artist }) {
+export default function GetFullReportButton({
+  id,
+  onClick,
+  className = "",
+  title,
+  artist,
+}) {
   const [open, setOpen] = useState(false);
 
   // support both primitive id or payload object { songId, title, artist }
   const payload = id && typeof id === "object" ? id : null;
-  const songId = payload ? (payload.songId ?? payload.id ?? "") : id;
-  const songTitle = payload ? (payload.title ?? payload.songTitle ?? "") : title ?? "";
-  const songArtist = payload ? (payload.artist ?? payload.songArtist ?? "") : artist ?? "";
+  const songId = payload ? payload.songId ?? payload.id ?? "" : id;
+  const songTitle = payload
+    ? payload.title ?? payload.songTitle ?? ""
+    : title ?? "";
+  const songArtist = payload
+    ? payload.artist ?? payload.songArtist ?? ""
+    : artist ?? "";
 
   const handle = (e) => {
     e?.stopPropagation();

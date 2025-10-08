@@ -1,11 +1,15 @@
-Results Table:
-Columns: Song Name, Artist, ISRC, Station, City, Spin Count, Last Played, Timestamp.
+This is a [Next.js](https://nextjs.org) project
 
-Sortable columns for easy analysis.
+### To run the app localy use:
 
-Export options for CSV or PDF reports.
+1. npm run dev
+2. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-Chart: A line chart showing spin counts over the selected date range, with options to
-toggle by station or city.
 
-So panel where you search the song, and can see all data about it, then see songs in a table version with option to export
+### To push changes to main Github branch:
+
+1. Sync everything on staging (commit)
+2. Switch to the main branch (git checkout main)
+3. Merge changes (git merge staging)
+4. Push changes (git push origin main)
+5. Initiate development to the production on Cloudflare

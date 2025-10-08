@@ -1,19 +1,11 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
-import Modal from "@/uikit/modal";
-import Button from "@/uikit/button";
-import { useNotification } from "@/providers/notifications";
+import Modal from "@/uikit/modal/modal";
+import Button from "@/uikit/button/button";
+import { useNotification } from "@/providers/notification/notifications";
 
-/**
- * Public constant/hash for linking directly to this modal.
- * Use `.../path#success` to open the modal.
- */
 export const PAYMENT_SUCCESS_HASH = "#success";
 
-/**
- * Helper (safe on server) to build a full URL that points to this modal.
- * If `base` is not provided and code runs in browser, it uses current origin+pathname.
- */
 export function buildPaymentSuccessUrl(base) {
   if (base) return `${base.replace(/#.*$/, "")}${PAYMENT_SUCCESS_HASH}`;
   if (typeof window === "undefined") return PAYMENT_SUCCESS_HASH;
@@ -61,12 +53,18 @@ export default function PaymentSuccessModal() {
 
   return (
     // match full-report-modal sizing / typography
-    <Modal isOpen={isOpen} onClose={close} title="Thank you for your payment!" size="m">
+    <Modal
+      isOpen={isOpen}
+      onClose={close}
+      title="Thank you for your payment!"
+      size="m"
+    >
       <div className="flex flex-col gap-4">
         <div className="text-sm text-neutral-700">
           The report will be sent to your email address.
           <br />
-          If you encounter any issues with the report, you can contact us using the form in the lower right corner of the screen.
+          If you encounter any issues with the report, you can contact us using
+          the form in the lower right corner of the screen.
         </div>
 
         <div className="w-full">

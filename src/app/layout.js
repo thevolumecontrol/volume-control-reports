@@ -3,7 +3,8 @@ import "../styles/global.css";
 
 import NavBar from "@/components/nav-bar";
 import Footer from "@/components/footer";
-import { NotificationProvider } from "@/providers/notifications";
+import { NotificationProvider } from "@/providers/notification/notifications";
+import ContactCTA from "@/components/modals/contact-us";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -19,6 +20,7 @@ export default function RootLayout({ children }) {
           <NavBar />
           <main>{children}</main>
           <Footer />
+          <ContactCTA />
         </NotificationProvider>
       </body>
     </html>

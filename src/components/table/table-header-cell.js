@@ -1,38 +1,22 @@
 "use client";
 import React from "react";
+import SortAscIcon from "@/uikit/icons/sort-asc";
+import SortDescIcon from "@/uikit/icons/sort-desc";
 
-/**
- * TableHeaderCell (controlled)
- * - label: string
- * - direction: "asc" | "desc" | null   // controlled prop
- * - onToggle: () => void               // called when user clicks (parent handles toggling logic)
- *
- * Uses external SVGs for sort icons (public/images/sortInc.svg, sortDec.svg)
- */
-export default function TableHeaderCell({ label, direction = null, onToggle = () => {} }) {
+export default function TableHeaderCell({
+  label,
+  direction = null,
+  onToggle = () => {},
+}) {
   const Icon = () => {
     if (direction === "asc") {
-      return (
-        <img
-          src="/images/sortInc.svg"
-          alt="sort ascending"
-          className="w-4 h-4"
-          aria-hidden="true"
-        />
-      );
+      return <SortAscIcon size={16} />;
     }
     if (direction === "desc") {
-      return (
-        <img
-          src="/images/sortDec.svg"
-          alt="sort descending"
-          className="w-4 h-4"
-          aria-hidden="true"
-        />
-      );
+      return <SortDescIcon size={16} />;
     }
-    // null: placeholder with same width as icon so label stays aligned to icon column
-    return <span className="w-4 h-4 inline-block" aria-hidden />;
+
+    return <span className="size-4 inline-block" />;
   };
 
   return (
@@ -47,8 +31,6 @@ export default function TableHeaderCell({ label, direction = null, onToggle = ()
         }
       }}
       className="flex items-center gap-2 px-1 py-1 rounded-md hover:bg-neutral-200 cursor-pointer select-none"
-      aria-pressed={direction !== null}
-      title={`Toggle sort for ${label}`}
     >
       <span className="flex-none">
         <Icon />

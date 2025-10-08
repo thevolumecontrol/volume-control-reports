@@ -1,241 +1,221 @@
 "use client";
-import React, { useRef, useState, useEffect } from "react";
-import TableCell from "./table-cell";
-import TableHeaderCell from "./table-header-cell";
-import GetFullReportButton from "@/uikit/get-full-report-button";
+import React, { useRef, useState, useEffect, useCallback } from "react";
+import TableHeader, { HEADERS, getInitialWidths } from "./table-header";
+import TableData from "./table-data";
+import Pagination from "./navigation/pagination";
+import PageNav from "./navigation/page-nav";
+import SearchBar from "@/components/table/search-bar";
+import { getSongs } from "@/utils/api";
+import { formatDate } from "@/utils/date-formatter";
+import { useColumnResize } from "./hooks/useColumnResize";
+import { getSortByForRequest, createHeaderControls } from "../../utils/sorting";
 
-/**
- * SimpleTable with resizable columns.
- *
- * New prop:
- * - headerControls: { [headerLabel]: { direction: "asc"|"desc"|null, onToggle: () => void } }
- */
-export default function SimpleTable({ headers: propHeaders, data: propData, headerControls = {}, searchTerm = "" }) {
-  const headers = propHeaders ?? [];
-  const data = propData ?? [];
+export default function Table({ station }) {
+  const wrapperRef = useRef(null);
+  const [searchInput, setSearchInput] = useState("");
+  const [files, setFiles] = useState([]);
+  const [error, setError] = useState(null);
 
-  const tableRef = useRef(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [nextPage, setNextPage] = useState(null);
+  const [prevPage, setPrevPage] = useState(null);
 
-  const defaultMap = {
-    Title: 27.5,
-    Artist: 22.5,
-    "Last played": 17.5,
-    "Played Total": 10, // was "Playing counts"
-    Genre: 10,
-    ISRC: 5,
-    "": 7.5, // width for added action column (empty header)
-  };
+  const [countsDir, setCountsDir] = useState("desc");
+  const [lastPlayedDir, setLastPlayedDir] = useState(null);
 
-  const initialWidths = (() => {
-    const widths = headers.map((h) => defaultMap[h] ?? 0);
-    const totalAssigned = widths.reduce((s, v) => s + v, 0);
-    const unassignedCount = widths.filter((w) => w === 0).length;
-    if (unassignedCount > 0) {
-      const remaining = Math.max(0, 100 - totalAssigned);
-      const each = remaining / unassignedCount;
-      return widths.map((w) => (w === 0 ? each : w));
-    }
-    const factor = 100 / totalAssigned;
-    return widths.map((w) => w * factor);
-  })();
+  const { colWidths, tableRef, startResize } = useColumnResize(
+    getInitialWidths()
+  );
 
-  const [colWidths, setColWidths] = useState(initialWidths);
-
+  // Reset when station changes
   useEffect(() => {
-    setColWidths(initialWidths);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [headers.join("|")]);
+    setCurrentPage(1);
+    setTotalPages(1);
+    setNextPage(null);
+    setPrevPage(null);
+    setFiles([]);
+    setSearchInput("");
+    setCountsDir("desc");
+    setLastPlayedDir(null);
+  }, [station]);
 
-  const resizing = useRef({
-    active: false,
-    colIndex: -1,
-    startX: 0,
-    startWidths: [],
-    tableWidth: 0,
-  });
+  const handleSearchInput = useCallback((text) => {
+    setSearchInput(text ?? "");
+    setCountsDir("desc");
+    setLastPlayedDir(null);
+    setCurrentPage(1);
+  }, []);
 
-  // set minimum percent to 5%
-  const minPercent = 5;
-
-  const onMouseMove = (e) => {
-    if (!resizing.current.active) return;
-    const deltaX = e.clientX - resizing.current.startX;
-    const tableRect = { width: resizing.current.tableWidth };
-    const deltaPercent = (deltaX / tableRect.width) * 100;
-
-    const i = resizing.current.colIndex;
-    const newWidths = [...resizing.current.startWidths];
-
-    // apply delta to column i (increase) and i+1 (decrease)
-    let left = newWidths[i] + deltaPercent;
-    let right = newWidths[i + 1] - deltaPercent;
-
-    // enforce min widths (minPercent) and ensure total stays ~100
-    if (left < minPercent) {
-      const diff = minPercent - left;
-      left = minPercent;
-      right -= diff;
-    }
-    if (right < minPercent) {
-      const diff = minPercent - right;
-      right = minPercent;
-      left -= diff;
+  // Fetch data
+  useEffect(() => {
+    if (!station) {
+      setFiles([]);
+      setError(null);
+      return;
     }
 
-    if (left < minPercent || right < minPercent) return;
+    let mounted = true;
+    const fetchFiles = async () => {
+      setError(null);
+      try {
+        const sortBy = getSortByForRequest(countsDir, lastPlayedDir);
+        const { items, meta } = await getSongs(
+          station,
+          currentPage,
+          sortBy,
+          searchInput
+        );
 
-    newWidths[i] = left;
-    newWidths[i + 1] = right;
-
-    setColWidths(newWidths);
-  };
-
-  const onMouseUp = () => {
-    if (!resizing.current.active) return;
-    resizing.current.active = false;
-    window.removeEventListener("mousemove", onMouseMove);
-    window.removeEventListener("mouseup", onMouseUp);
-  };
-
-  const startResize = (e, index) => {
-    if (e.button !== 0) return;
-    const tableEl = tableRef.current;
-    if (!tableEl) return;
-    resizing.current = {
-      active: true,
-      colIndex: index,
-      startX: e.clientX,
-      startWidths: [...colWidths],
-      tableWidth: tableEl.getBoundingClientRect().width || tableEl.offsetWidth || 1,
+        if (mounted) {
+          setFiles(items);
+          setCurrentPage(meta.curPage ?? currentPage);
+          setTotalPages(meta.pageTotal ?? 1);
+          setNextPage(meta.nextPage ?? null);
+          setPrevPage(meta.prevPage ?? null);
+        }
+      } catch (e) {
+        console.error("fetchFiles error:", e);
+        if (mounted) setError(e?.message ?? "Failed to load files");
+      }
     };
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", onMouseUp);
+
+    fetchFiles();
+    return () => {
+      mounted = false;
+    };
+  }, [station, currentPage, countsDir, lastPlayedDir, searchInput]);
+
+  const handlePrev = () => prevPage != null && setCurrentPage(prevPage);
+  const handleNext = () => nextPage != null && setCurrentPage(nextPage);
+
+  const handlePageChange = (page) => {
+    if (!page || page === currentPage) return;
+    setCurrentPage(page);
+
+    const el = wrapperRef.current;
+    if (el) {
+      try {
+        if (el.scrollHeight > el.clientHeight) {
+          el.scrollTo({ top: 0, behavior: "smooth" });
+        } else {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      } catch (e) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
   };
+
+  const handleHeaderToggle = (headerLabel) => {
+    if (headerLabel === "Played Total") {
+      setCountsDir((prev) =>
+        prev === "desc" ? "asc" : prev === "asc" ? "desc" : "desc"
+      );
+      setLastPlayedDir(null);
+    } else if (headerLabel === "Last played") {
+      setLastPlayedDir((prev) =>
+        prev === "desc" ? "asc" : prev === "asc" ? "desc" : "desc"
+      );
+      setCountsDir(null);
+    }
+    setCurrentPage(1);
+  };
+
+  const headerControls = createHeaderControls(
+    countsDir,
+    lastPlayedDir,
+    handleHeaderToggle
+  );
+
+  // Direct mapping without transformation
+  const tableData =
+    files.length > 0
+      ? files.map((f) => [
+          f.title,
+          f.artist,
+          formatDate(f.last_played_at),
+          String(f.counts_all_time ?? 0),
+          f.genre,
+          f.isrc,
+          {
+            songId: f._raw?.song?.id ?? f.id ?? f.song_id ?? "",
+            title: f.title ?? f._raw?.song?.title ?? "",
+            artist: f.artist ?? f._raw?.song?.artist ?? "",
+          },
+        ])
+      : Array.from({ length: 10 }, () => [
+          " ",
+          " ",
+          " ",
+          " ",
+          " ",
+          " ",
+          { songId: "", title: "", artist: "" },
+        ]);
 
   return (
-    <div className="w-full overflow-auto bg-white rounded-md shadow-sm border border-neutral-200">
-      <div ref={tableRef} className="w-full">
-        {/* ensure fixed layout */}
-        <table className="min-w-full table-fixed" style={{ tableLayout: "fixed", width: "100%" }}>
-          <colgroup>
-            {colWidths.map((w, i) => (
-              <col key={i} style={{ width: `${w}%` }} />
-            ))}
-          </colgroup>
+    <div ref={wrapperRef} className="flex flex-col gap-4">
+      {error && <div className="text-sm text-red-500">Error: {error}</div>}
 
-          <thead>
-            <tr>
-              {/* render headers, but make "ISRC" span two columns (colSpan=2) */}
-              {(() => {
-                const ths = [];
-                for (let i = 0; i < headers.length; i++) {
-                  const h = headers[i];
-                  if (h === "ISRC") {
-                    // render ISRC spanning two columns (skip next header)
-                    ths.push(
-                      <th
-                        key={i}
-                        colSpan={2}
-                        className="bg-neutral-100 px-4 py-3 border-b border-neutral-200 text-sm font-medium text-neutral-700 text-left relative"
-                        style={{ verticalAlign: "middle", minWidth: `${minPercent}%` }}
-                      >
-                        {headerControls && headerControls[h] ? (
-                          <TableHeaderCell
-                            label={h}
-                            direction={headerControls[h].direction ?? null}
-                            onToggle={headerControls[h].onToggle}
-                          />
-                        ) : (
-                          <div className="overflow-hidden text-ellipsis max-w-full">{h}</div>
-                        )}
+      <div className="flex items-end justify-between gap-4">
+        <div className="flex-none w-96">
+          <SearchBar onSearch={handleSearchInput} />
+        </div>
 
-                        {i < headers.length - 1 && (
-                          <div
-                            onMouseDown={(e) => startResize(e, i)}
-                            className="absolute right-0 top-0 h-full w-2 -mr-1 cursor-col-resize z-10"
-                            style={{ touchAction: "none" }}
-                          >
-                            <div className="h-full w-0.5 bg-neutral-200 mx-auto" />
-                          </div>
-                        )}
-                      </th>
-                    );
-                    i++; // skip next (the extra action column) because ISRC spans it
-                    continue;
-                  }
+        <div className="ml-4">
+          <Pagination
+            onPrev={handlePrev}
+            onNext={handleNext}
+            disabledPrev={prevPage == null}
+            disabledNext={nextPage == null}
+            currentPage={currentPage}
+            totalPages={totalPages}
+          />
+        </div>
+      </div>
 
-                  ths.push(
-                    <th
-                      key={i}
-                      className="bg-neutral-100 px-4 py-3 border-b border-neutral-200 text-sm font-medium text-neutral-700 text-left relative"
-                      style={{ verticalAlign: "middle", minWidth: `${minPercent}%` }}
-                    >
-                      {headerControls && headerControls[h] ? (
-                        <TableHeaderCell
-                          label={h}
-                          direction={headerControls[h].direction ?? null}
-                          onToggle={headerControls[h].onToggle}
-                        />
-                      ) : (
-                        <div className="overflow-hidden text-ellipsis max-w-full">{h}</div>
-                      )}
-
-                      {i < headers.length - 1 && (
-                        <div
-                          onMouseDown={(e) => startResize(e, i)}
-                          className="absolute right-0 top-0 h-full w-2 -mr-1 cursor-col-resize z-10"
-                          style={{ touchAction: "none" }}
-                        >
-                          <div className="h-full w-0.5 bg-neutral-200 mx-auto" />
-                        </div>
-                      )}
-                    </th>
-                  );
-                }
-                return ths;
-              })()}
-            </tr>
-          </thead>
-
-          <tbody>
-            {data.map((row, rIdx) => (
-              <tr
-                key={rIdx}
-                // make row positioned so absolute button inside can be positioned relative to row
-                className={`${rIdx % 2 === 1 ? "bg-neutral-50" : ""} hover:bg-neutral-100 group relative`}
+      <div>
+        {files.length > 0 ? (
+          <div className="w-full overflow-auto bg-white rounded-md shadow-sm border border-neutral-200">
+            <div ref={tableRef} className="w-full">
+              <table
+                className="min-w-full table-fixed"
+                style={{ tableLayout: "fixed", width: "100%" }}
               >
-                {row.map((cellText, cIdx) => {
-                  const isActionCol = cIdx === headers.length - 1;
-                  return (
-                    // allow this cell to expose overflow so the absolute button can overlap neighbors
-                    <TableCell
-                      key={cIdx}
-                      style={{ minWidth: `${minPercent}%` }}
-                      highlight={searchTerm}
-                      innerOverflowVisible={isActionCol}
-                    >
-                      {isActionCol ? (
-                        // position button absolutely within the row (so it can overlap adjacent cells)
-                        <div className="relative overflow-visible w-full h-full">
-                          <GetFullReportButton
-                            id={cellText}
-                            onClick={(id) => {
-                              console.log("Get full report for id:", id);
-                            }}
-                            // pin button closer to the right edge with a small offset, vertically centered
-                            className="absolute right-0 top-1/2 transform -translate-y-1/2 z-20 opacity-0 group-hover:opacity-100 transition-opacity"
-                          />
-                        </div>
-                      ) : (
-                        cellText
-                      )}
-                    </TableCell>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                <colgroup>
+                  {colWidths.map((w, i) => (
+                    <col key={i} style={{ width: `${w}%` }} />
+                  ))}
+                </colgroup>
+
+                <TableHeader
+                  colWidths={colWidths}
+                  headerControls={headerControls}
+                  onStartResize={startResize}
+                />
+
+                <TableData
+                  data={tableData}
+                  headers={HEADERS}
+                  searchTerm={searchInput}
+                />
+              </table>
+            </div>
+          </div>
+        ) : (
+          <div className="py-12 text-center text-neutral-500 select-none">
+            Nothing to show...
+          </div>
+        )}
+      </div>
+
+      <div className="flex justify-center">
+        <PageNav
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onChange={handlePageChange}
+        />
       </div>
     </div>
   );

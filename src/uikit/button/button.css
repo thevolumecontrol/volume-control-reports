@@ -1,0 +1,51 @@
+.button-base {
+  @apply flex flex-row items-center justify-center font-medium border whitespace-nowrap transition-all no-underline rounded-full;
+}
+
+.button-size-s {
+  @apply text-sm py-1.5 px-2.5 gap-1.5 h-8;
+}
+
+.button-size-m {
+  @apply text-base/5 py-2.5 px-4 gap-2 h-11;
+}
+
+.button-variant-identity {
+  @apply px-4 bg-brand !text-white hover:bg-primary-700  border-0;
+}
+
+.button-variant-primary {
+  @apply bg-inverse border-0 hover:opacity-90;
+}
+
+.button-variant-secondary {
+  @apply border border-color-100 hover:bg-interactive active:bg-interactive-active;
+}
+
+.button-variant-transparent {
+  @apply border-0 bg-transparent rounded-xl hover:bg-interactive;
+}
+
+.button-variant-icon {
+  @apply size-9 rounded-xl border-0 bg-transparent p-0 hover:bg-interactive-active;
+}
+
+.button-variant-icon-s {
+  @apply size-8 rounded-lg border-0 bg-transparent p-0 hover:bg-interactive-active;
+}
+
+.button-variant-icon-xs {
+  @apply size-6 rounded-md border-0 bg-transparent p-0 hover:bg-interactive-active;
+}
+
+.button-disabled {
+  @apply cursor-not-allowed opacity-70;
+}
+
+.button-full-width {
+  @apply w-full;
+}
+
+.button-space-between {
+  @apply justify-between;
+}

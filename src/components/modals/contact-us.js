@@ -1,10 +1,10 @@
 "use client";
 import { useState } from "react";
-import Button from "@/uikit/button";
-import Modal from "@/uikit/modal";
-import Input from "@/uikit/input";
+import Button from "@/uikit/button/button";
+import Modal from "@/uikit/modal/modal";
+import Input from "@/uikit/input/input";
 import Selector from "@/uikit/selector";
-import { useNotification } from "@/providers/notifications";
+import { useNotification } from "@/providers/notification/notifications";
 import ChatIcon from "@/uikit/icons/chat-icon";
 import { submitContact } from "@/utils/api";
 
@@ -89,7 +89,7 @@ export default function ContactCTA() {
     <>
       <div className="flex flex-col gap-3  fixed bottom-6 right-6 z-999">
         <button
-          className="rounded-full border-standard size-13 flex items-center justify-center cursor-pointer shadow-base bg-white hover:bg-brand-gray-200 active:bg-brand-gray-400"
+          className="rounded-full border-standard size-13 flex items-center justify-center cursor-pointer shadow-base bg-white hover:bg-neutral-200 active:bg-neutral-400"
           onClick={openModal}
         >
           <ChatIcon size={32} />

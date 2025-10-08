@@ -1,10 +1,9 @@
 "use client";
-import Dropdown from "./dropdown";
+import Dropdown from "./dropdown/dropdown";
 import IconCheckSimple from "@/uikit/icons/check-simple";
 import DownIcon from "@/uikit/icons/down";
 
 export default function Selector({
-  name,
   label,
   value,
   onChange,
@@ -18,7 +17,6 @@ export default function Selector({
 }) {
   const selectorStyles = `${error ? "border-red-400 ring-red-400" : ""}`;
 
-  // Support options as array of objects { label, value } or as strings
   const normalizedOptions = (options || []).map((option) =>
     typeof option === "object"
       ? { label: option.label, value: option.value }
