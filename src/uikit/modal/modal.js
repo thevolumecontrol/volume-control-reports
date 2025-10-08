@@ -21,9 +21,14 @@ const Modal = ({ isOpen, onClose, children, title, size = "m" }) => {
       document.body.style.overflow = "hidden";
     } else {
       setIsVisible(false);
-      document.body.style.overflow = "";
-      const timer = setTimeout(() => setMounted(false), 300);
-      return () => clearTimeout(timer);
+      const timer = setTimeout(() => {
+        setMounted(false);
+        document.body.style.overflow = "";
+      }, 300);
+      return () => {
+        clearTimeout(timer);
+        document.body.style.overflow = "";
+      };
     }
   }, [isOpen]);
 

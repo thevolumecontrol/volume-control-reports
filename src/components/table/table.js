@@ -5,6 +5,7 @@ import TableData from "./table-data";
 import Pagination from "./pagination/pagination";
 import PageNav from "./pagination/page-nav";
 import SearchBar from "@/components/table/search-bar";
+import FullReportModal from "@/components/modals/get-report-modal";
 import { getSongs } from "@/utils/api";
 import { formatDate } from "@/utils/date-formatter";
 import { useColumnResize } from "./header/column-resize";
@@ -23,6 +24,13 @@ export default function Table({ station }) {
 
   const [countsDir, setCountsDir] = useState("desc");
   const [lastPlayedDir, setLastPlayedDir] = useState(null);
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedSong, setSelectedSong] = useState({
+    songId: "",
+    title: "",
+    artist: "",
+  });
 
   const { colWidths, tableRef, startResize } = useColumnResize();
 
@@ -120,6 +128,11 @@ export default function Table({ station }) {
     setCurrentPage(1);
   };
 
+  const handleGetReport = (songData) => {
+    setSelectedSong(songData);
+    setModalOpen(true);
+  };
+
   const headerControls = createHeaderControls(
     countsDir,
     lastPlayedDir,
@@ -153,64 +166,78 @@ export default function Table({ station }) {
         ]);
 
   return (
-    <div ref={wrapperRef} className="flex flex-col gap-4">
-      {error && <div className="text-sm text-red-500">Error: {error}</div>}
+    <>
+      <div ref={wrapperRef} className="flex flex-col gap-4">
+        {error && <div className="text-sm text-red-500">Error: {error}</div>}
 
-      <div className="flex items-end justify-between gap-4">
-        <div className="flex-none w-96">
-          <SearchBar onSearch={handleSearchInput} />
+        <div className="flex items-end justify-between gap-4">
+          <div className="flex-none w-96">
+            <SearchBar onSearch={handleSearchInput} />
+          </div>
+
+          <div className="ml-4">
+            <Pagination
+              onPrev={handlePrev}
+              onNext={handleNext}
+              disabledPrev={prevPage == null}
+              disabledNext={nextPage == null}
+              currentPage={currentPage}
+              totalPages={totalPages}
+            />
+          </div>
         </div>
 
-        <div className="ml-4">
-          <Pagination
-            onPrev={handlePrev}
-            onNext={handleNext}
-            disabledPrev={prevPage == null}
-            disabledNext={nextPage == null}
+        <div>
+          {files.length > 0 ? (
+            <div className="w-full overflow-auto bg-white rounded-md shadow-sm border border-neutral-200">
+              <div ref={tableRef} className="w-full">
+                <table
+                  className="min-w-full table-fixed"
+                  style={{ tableLayout: "fixed", width: "100%" }}
+                >
+                  <colgroup>
+                    {colWidths.map((w, i) => (
+                      <col key={i} style={{ width: `${w}%` }} />
+                    ))}
+                  </colgroup>
+
+                  <TableHeader
+                    colWidths={colWidths}
+                    headerControls={headerControls}
+                    onStartResize={startResize}
+                  />
+
+                  <TableData
+                    data={tableData}
+                    searchTerm={searchInput}
+                    onGetReport={handleGetReport}
+                  />
+                </table>
+              </div>
+            </div>
+          ) : (
+            <div className="py-12 text-center text-neutral-500 select-none">
+              Nothing to show...
+            </div>
+          )}
+        </div>
+
+        <div className="flex justify-center">
+          <PageNav
             currentPage={currentPage}
             totalPages={totalPages}
+            onChange={handlePageChange}
           />
         </div>
       </div>
 
-      <div>
-        {files.length > 0 ? (
-          <div className="w-full overflow-auto bg-white rounded-md shadow-sm border border-neutral-200">
-            <div ref={tableRef} className="w-full">
-              <table
-                className="min-w-full table-fixed"
-                style={{ tableLayout: "fixed", width: "100%" }}
-              >
-                <colgroup>
-                  {colWidths.map((w, i) => (
-                    <col key={i} style={{ width: `${w}%` }} />
-                  ))}
-                </colgroup>
-
-                <TableHeader
-                  colWidths={colWidths}
-                  headerControls={headerControls}
-                  onStartResize={startResize}
-                />
-
-                <TableData data={tableData} searchTerm={searchInput} />
-              </table>
-            </div>
-          </div>
-        ) : (
-          <div className="py-12 text-center text-neutral-500 select-none">
-            Nothing to show...
-          </div>
-        )}
-      </div>
-
-      <div className="flex justify-center">
-        <PageNav
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onChange={handlePageChange}
-        />
-      </div>
-    </div>
+      <FullReportModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        songId={selectedSong.songId}
+        title={selectedSong.title}
+        artist={selectedSong.artist}
+      />
+    </>
   );
 }
