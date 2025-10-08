@@ -1,78 +1,117 @@
 "use client";
-import { useState, useEffect } from "react";
-import CancelIcon from "./icons/cancel";
+import React, { useEffect, useCallback, useRef } from "react";
+import { createPortal } from "react-dom";
 import "@/styles/modal.css";
 
+/**
+ * module-scoped counter tracks how many modals currently requested "no-scroll"
+ * so nested modals won't accidentally restore body overflow too early.
+ */
+let openModalCount = 0;
+const prevOverflowStore = { value: "" };
+
+/**
+ * useModal helper (keeps API same)
+ */
 export const useModal = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  return {
-    isOpen,
-    openModal: () => setIsOpen(true),
-    closeModal: () => setIsOpen(false),
-  };
+  const open = (setOpen) => setOpen(true);
+  const close = (setOpen) => setOpen(false);
+  return { open, close };
 };
 
+/**
+ * Modal — рендерится в портале в document.body и занимает весь экран.
+ * Закрывается по клику на бэкдроп и по Escape. Блокирует скролл страницы.
+ */
 const Modal = ({ isOpen, onClose, children, title, size = "m" }) => {
-  const [mounted, setMounted] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
+  const handleKey = useCallback(
+    (e) => {
+      if (e.key === "Escape") onClose?.();
+    },
+    [onClose]
+  );
+
+  const prevOverflowRef = useRef(null);
 
   useEffect(() => {
-    if (isOpen) {
-      setMounted(true);
-      document.body.style.overflow = "hidden";
+    if (!isOpen) return;
 
-      // Use setTimeout for more reliable timing
-      const timer = setTimeout(() => {
-        setIsVisible(true);
-      }, 10); // Small delay to ensure DOM is ready
+    document.addEventListener("keydown", handleKey);
 
-      return () => clearTimeout(timer);
-    } else {
-      setIsVisible(false);
-      document.body.style.overflow = "";
-
-      const timer = setTimeout(() => setMounted(false), 300);
-      return () => clearTimeout(timer);
+    // store previous overflow only when this is the first modal
+    if (openModalCount === 0) {
+      prevOverflowStore.value = document.body.style.overflow || "";
     }
-  }, [isOpen]);
+    openModalCount = openModalCount + 1;
+    prevOverflowRef.current = prevOverflowStore.value;
 
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key === "Escape") {
-        onClose();
+    // lock scroll
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", handleKey);
+      // decrement count and restore only when no modals remain
+      openModalCount = Math.max(0, openModalCount - 1);
+      if (openModalCount === 0) {
+        document.body.style.overflow = prevOverflowRef.current || "";
       }
     };
+  }, [isOpen, handleKey]);
 
-    if (isOpen) {
-      document.addEventListener("keydown", handleKeyDown);
-    }
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isOpen, onClose]);
+  if (!isOpen) return null;
 
-  if (!mounted) return null;
+  const sizeClass =
+    size === "s" ? "max-w-sm" : size === "l" ? "max-w-xl" : "max-w-md";
 
-  const showClass = isVisible ? "show" : "";
+  const modalContent = (
+    <aside
+      className="fixed inset-0 z-[9999] flex items-center justify-center"
+      aria-hidden={!isOpen}
+    >
+      {/* backdrop */}
+      <div
+        className="fixed inset-0 backdrop-blur-sm"
+        onClick={onClose}
+        style={{ backgroundColor: "rgba(0,0,0,0.12)" }}
+      />
 
-  return (
-    <aside className={`modal-overlay ${showClass}`}>
-      <div className={`modal-backdrop ${showClass}`} onClick={onClose} />
-      <div className={`modal-content modal-${size} ${showClass}`}>
-        <div className="modal-header ">
-          {title && <p className="title-s font-medium">{title}</p>}
-          <button
-            onClick={onClose}
-            className="cursor-pointer hover:opacity-70 transition-opacity"
-          >
-            <CancelIcon size={24} />
-          </button>
+      {/* dialog */}
+      <div
+        role="dialog"
+        aria-modal="true"
+        className={`relative z-10 w-full ${sizeClass} mx-4`}
+        style={{ maxHeight: "90vh" }}
+      >
+        <div className="bg-white rounded-md shadow-lg overflow-hidden">
+          <div className="flex items-center justify-between px-4 py-3">
+            {title ? (
+              <h3
+                className="text-lg font-semibold text-neutral-800"
+                style={{ fontSize: "1.125rem" }}
+              >
+                {title}
+              </h3>
+            ) : (
+              <div />
+            )}
+            <button
+              onClick={onClose}
+              aria-label="Close"
+              className="ml-3 rounded-md p-1 hover:bg-neutral-100 transition"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="p-4 overflow-auto" style={{ maxHeight: "calc(90vh - 80px)" }}>
+            {children}
+          </div>
         </div>
-
-        <div className="p-5">{children}</div>
       </div>
     </aside>
   );
+
+  return createPortal(modalContent, document.body);
 };
 
 export default Modal;

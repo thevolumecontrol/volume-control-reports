@@ -8,6 +8,10 @@ export const endpoints = {
   queryStations: "/query_stations",
   // keep base path; page_id and sortBy will be appended as query params by getSongs
   querySongs: (stationId) => `/query_songs/${encodeURIComponent(stationId)}`,
+  // new: submit contact request
+  submitRequest: "/submit_request",
+  // stripe checkout endpoint
+  stripeCheckout: "/stripe/checkout",
 };
 
 // Simple in-memory TTL cache
@@ -59,7 +63,25 @@ async function fetchJson(path, method = "GET", init = {}, opts = {}) {
     logResponse(m, url, res.status, duration, text);
 
     if (!res.ok) {
-      const err = new Error(`HTTP ${res.status}`);
+      // try to parse server error body (JSON) and include it on the thrown error
+      let parsed = null;
+      try {
+        parsed = text ? JSON.parse(text) : null;
+      } catch (e) {
+        parsed = null;
+      }
+
+      const serverMessage =
+        (parsed && (parsed.message || parsed.error || parsed.msg)) ||
+        text ||
+        res.statusText ||
+        `HTTP ${res.status}`;
+
+      const err = new Error(serverMessage);
+      // attach useful diagnostics for callers
+      err.status = res.status;
+      err.payload = parsed;
+
       logError(m, url, err, duration, text);
       throw err;
     }
@@ -140,10 +162,52 @@ export async function getSongs(stationId, pageId = 1, sortBy = null) {
       genre: song.genre ?? "",
       isrc: song.isrc ?? "",
       counts_all_time: item.counts_all_time ?? 0,
-      last_played_at: item.last_played_at ?? null, // keep raw value (unix seconds or null)
+      last_played_at: item.last_played_at ?? null,
       _raw: item,
     };
   });
 
   return { items, meta };
+}
+
+/**
+ * submitContact - sends simple contact request (query params)
+ * topic, email, message -> encoded into query string
+ */
+export async function submitContact(topic, email, message) {
+  const params = new URLSearchParams();
+  if (topic != null) params.set("topic", String(topic));
+  if (email != null) params.set("email", String(email));
+  if (message != null) params.set("message", String(message));
+  const path = `${endpoints.submitRequest}?${params.toString()}`;
+  // use fetchJson (will log requests) — GET with query params as requested
+  return fetchJson(path, "GET", {}, { cacheTTL: 0 });
+}
+
+/**
+ * createStripeCheckout - request a stripe checkout session (GET with query params)
+ * - song_id: string
+ * - customer_email: string
+ * - cancel_url: string (defaults to origin + "/")
+ * - success_url: string (defaults to origin + pathname + "#success")
+ *
+ * Returns parsed JSON from the API.
+ */
+export async function createStripeCheckout(song_id, customer_email, cancel_url = null, success_url = null) {
+  // derive defaults in browser-safe way
+  if ((cancel_url == null || success_url == null) && typeof window !== "undefined") {
+    const origin = window.location.origin;
+    const pathname = window.location.pathname || "/";
+    if (cancel_url == null) cancel_url = `${origin}/`;
+    if (success_url == null) success_url = `${origin}${pathname}#success`;
+  }
+
+  const params = new URLSearchParams();
+  if (song_id != null) params.set("song_id", String(song_id));
+  if (customer_email != null) params.set("customer_email", String(customer_email));
+  if (cancel_url != null) params.set("cancel_url", String(cancel_url));
+  if (success_url != null) params.set("success_url", String(success_url));
+
+  const path = `${endpoints.stripeCheckout}?${params.toString()}`;
+  return fetchJson(path, "GET", {}, { cacheTTL: 0 });
 }

@@ -1,14 +1,20 @@
 "use client";
 import React from "react";
 
-export default function TableCell({ children, className = "", onClick, style = {}, highlight = "" }) {
+export default function TableCell({
+  children,
+  className = "",
+  onClick,
+  style = {},
+  highlight = "",
+  innerOverflowVisible = false, // new prop to control inner scroll area
+}) {
   // only handle simple strings; passthrough for nodes/non-strings
   const renderWithHighlight = (text, query) => {
     if (!query || typeof text !== "string") return text;
     const q = String(query).trim();
     if (q === "") return text;
 
-    // escape regexp special chars
     const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const regex = new RegExp(esc(q), "ig");
 
@@ -25,22 +31,24 @@ export default function TableCell({ children, className = "", onClick, style = {
       lastIndex = idx + m[0].length;
     }
     if (lastIndex < text.length) parts.push(text.slice(lastIndex));
-    // if no matches, return original text
     return parts.length > 0 ? parts : text;
   };
 
   const content =
     typeof children === "string" ? renderWithHighlight(children, highlight) : children;
 
+  // inner overflow class switches between scrollable and visible (for action button overlap)
+  const innerOverflowClass = innerOverflowVisible ? "overflow-visible" : "overflow-x-auto";
+
   return (
     <td
-      className={`bg-transparent px-4 py-3 text-sm text-neutral-800 overflow-hidden ${className}`}
+      className={`bg-transparent px-4 py-3 text-sm text-neutral-800 overflow-visible ${className}`}
       onClick={onClick}
       style={style}
     >
       <div className="min-w-0 w-full">
         <div
-          className="w-full overflow-x-auto whitespace-nowrap hide-scroll"
+          className={`w-full whitespace-nowrap hide-scroll ${innerOverflowClass}`}
           style={{ WebkitOverflowScrolling: "touch", msOverflowStyle: "none", scrollbarWidth: "none" }}
         >
           {content}
