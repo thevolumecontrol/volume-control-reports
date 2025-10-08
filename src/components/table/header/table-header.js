@@ -1,43 +1,7 @@
 "use client";
 import React from "react";
 import TableHeaderCell from "./table-header-cell";
-
-const HEADERS = [
-  "Title",
-  "Artist",
-  "Last played",
-  "Played Total",
-  "Genre",
-  "ISRC",
-  "",
-];
-
-const DEFAULT_WIDTHS = {
-  Title: 27.5,
-  Artist: 22.5,
-  "Last played": 17.5,
-  "Played Total": 10,
-  Genre: 10,
-  ISRC: 5,
-  "": 7.5,
-};
-
-export const getInitialWidths = (headers = HEADERS) => {
-  const widths = headers.map((h) => DEFAULT_WIDTHS[h] ?? 0);
-  const totalAssigned = widths.reduce((s, v) => s + v, 0);
-  const unassignedCount = widths.filter((w) => w === 0).length;
-
-  if (unassignedCount > 0) {
-    const remaining = Math.max(0, 100 - totalAssigned);
-    const each = remaining / unassignedCount;
-    return widths.map((w) => (w === 0 ? each : w));
-  }
-
-  const factor = 100 / totalAssigned;
-  return widths.map((w) => w * factor);
-};
-
-export { HEADERS };
+import { HEADERS } from "./column-resize";
 
 export default function TableHeader({
   headerControls = {},

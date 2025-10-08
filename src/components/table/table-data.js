@@ -1,14 +1,9 @@
 "use client";
 import React from "react";
 import TableCell from "./table-cell";
-import GetFullReportButton from "./get-full-report-button";
+import GetFullReportButton from "./get-report-button";
 
-export default function TableData({
-  data,
-  headers,
-  searchTerm = "",
-  minPercent = 5,
-}) {
+export default function TableData({ data, searchTerm = "", minPercent = 5 }) {
   return (
     <tbody>
       {data.map((row, rIdx) => (
@@ -19,7 +14,7 @@ export default function TableData({
           } hover:bg-neutral-100 group relative`}
         >
           {row.map((cellText, cIdx) => {
-            const isActionCol = cIdx === headers.length - 1;
+            const isActionCol = cIdx === row.length - 1;
             return (
               <TableCell
                 key={cIdx}

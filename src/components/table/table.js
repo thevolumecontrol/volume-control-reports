@@ -1,13 +1,13 @@
 "use client";
 import React, { useRef, useState, useEffect, useCallback } from "react";
-import TableHeader, { HEADERS, getInitialWidths } from "./table-header";
+import TableHeader from "./header/table-header";
 import TableData from "./table-data";
-import Pagination from "./navigation/pagination";
-import PageNav from "./navigation/page-nav";
+import Pagination from "./pagination/pagination";
+import PageNav from "./pagination/page-nav";
 import SearchBar from "@/components/table/search-bar";
 import { getSongs } from "@/utils/api";
 import { formatDate } from "@/utils/date-formatter";
-import { useColumnResize } from "./hooks/useColumnResize";
+import { useColumnResize } from "./header/column-resize";
 import { getSortByForRequest, createHeaderControls } from "../../utils/sorting";
 
 export default function Table({ station }) {
@@ -24,9 +24,7 @@ export default function Table({ station }) {
   const [countsDir, setCountsDir] = useState("desc");
   const [lastPlayedDir, setLastPlayedDir] = useState(null);
 
-  const { colWidths, tableRef, startResize } = useColumnResize(
-    getInitialWidths()
-  );
+  const { colWidths, tableRef, startResize } = useColumnResize();
 
   // Reset when station changes
   useEffect(() => {
@@ -195,11 +193,7 @@ export default function Table({ station }) {
                   onStartResize={startResize}
                 />
 
-                <TableData
-                  data={tableData}
-                  headers={HEADERS}
-                  searchTerm={searchInput}
-                />
+                <TableData data={tableData} searchTerm={searchInput} />
               </table>
             </div>
           </div>
