@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import FullReportModal from "@/components/modals/full-report-modal";
+import Button from "@/uikit/button";
 
 export default function GetFullReportButton({ id, onClick, className = "", title, artist }) {
   const [open, setOpen] = useState(false);
@@ -12,21 +13,22 @@ export default function GetFullReportButton({ id, onClick, className = "", title
   const songArtist = payload ? (payload.artist ?? payload.songArtist ?? "") : artist ?? "";
 
   const handle = (e) => {
-    e.stopPropagation();
+    e?.stopPropagation();
     setOpen(true);
     if (typeof onClick === "function") onClick(songId);
   };
 
   return (
     <>
-      <button
+      <Button
         type="button"
         onClick={handle}
-        className={`rounded-md px-2 py-0.5 bg-neutral-200 hover:bg-neutral-300 text-xs text-neutral-800 ${className}`}
-        aria-label="Get report"
+        variant="black"
+        size="s"
+        className={`text-xm px-2 py-0.5 rounded-md transition-colors duration-150 ${className}`}
       >
         Get report
-      </button>
+      </Button>
 
       <FullReportModal
         isOpen={open}

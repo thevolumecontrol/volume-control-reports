@@ -222,7 +222,8 @@ export default function SimpleTable({ headers: propHeaders, data: propData, head
                             onClick={(id) => {
                               console.log("Get full report for id:", id);
                             }}
-                            className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-20 opacity-0 group-hover:opacity-100 transition-opacity"
+                            // pin button closer to the right edge with a small offset, vertically centered
+                            className="absolute right-0 top-1/2 transform -translate-y-1/2 z-20 opacity-0 group-hover:opacity-100 transition-opacity"
                           />
                         </div>
                       ) : (

@@ -88,7 +88,7 @@ export default function Selector({
 
   return (
     <div className={`flex flex-col gap-2 ${visible ? "" : "hidden"}`}>
-      <label className="input-label">
+      <label className="input-labe text-sm">
         {label}
         {optional && (
           <span className="text-xs text-neutral-800"> (Optional)</span>
@@ -103,7 +103,7 @@ export default function Selector({
       <div className="relative">
         <Dropdown
           toggleContent={toggleContent}
-          dropdownSize="m"
+          dropdownSize="auto"
           dropdownOrientation="bottom"
           horizontalPosition="left"
         >

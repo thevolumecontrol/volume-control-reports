@@ -18,6 +18,12 @@
   pointer-events: auto;
 }
 
+.modal-overlay.xl {
+  align-items: stretch;
+  padding: 0;
+  margin: 0;
+}
+
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -30,12 +36,7 @@
   opacity: 0.6;
 }
 
-.modal-header {
-  @apply flex justify-between items-center p-5 border-b border-neutral-400;
-}
-
 .modal-content {
-  @apply bg-white;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -43,11 +44,11 @@
   max-height: calc(100vh - 4rem);
   margin: auto;
   overflow-y: auto;
-  border-radius: 1rem;
+  background-color: white;
+  border-radius: 1.5rem;
   transform: translateY(1rem);
   opacity: 0;
   transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
-  z-index: 9999;
 }
 
 .modal-content.show {
@@ -56,7 +57,18 @@
 }
 
 .modal-m {
-  @apply max-w-xl;
+  @apply max-w-lg p-6 gap-6;
+}
+
+.modal-l {
+  @apply max-w-[45rem] p-8 gap-8;
+}
+
+.modal-xl {
+  @apply max-w-[100%] h-[100%] px-8 pb-8 gap-8;
+  margin: 0;
+  border-radius: 0;
+  max-height: 100%;
 }
 
 @media (max-width: 768px) {
@@ -71,5 +83,11 @@
   .modal-overlay {
     align-items: stretch;
     padding: 0;
+  }
+
+  .modal-m,
+  .modal-l,
+  .modal-xl {
+    @apply max-w-none p-4;
   }
 }

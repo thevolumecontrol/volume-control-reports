@@ -17,7 +17,7 @@ export default function Input({
   const id = useId();
 
   const baseWrapper =
-    "w-full flex flex-col gap-2 text-sm";
+    "w-full flex flex-col gap-2 text-sm font-normal";
   const fieldWrapper = `rounded-md transition-colors ${
     error ? "border border-red-400" : "border border-neutral-200"
   } bg-neutral-100 hover:bg-neutral-200 focus-within:bg-neutral-100 ${className}`;
@@ -38,8 +38,8 @@ export default function Input({
   return (
     <div className={baseWrapper}>
       {label && (
-        <label htmlFor={id} className={`font-medium ${error ? "text-red-600" : "text-neutral-700"}`}>
-          {label} {required && <span className="text-neutral-500">*</span>}
+        <label htmlFor={id} className={`${error ? "text-red-600" : "text-neutral-700"}`}>
+          {label} {required && <span className="text-red-600">*</span>}
         </label>
       )}
 

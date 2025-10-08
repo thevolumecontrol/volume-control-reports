@@ -87,7 +87,7 @@ export default function ContactCTA() {
 
   return (
     <>
-      <div className="flex flex-col  fixed bottom-6 right-6 z-999">
+      <div className="flex flex-col gap-3  fixed bottom-6 right-6 z-999">
         <button
           className="rounded-full border-standard size-13 flex items-center justify-center cursor-pointer shadow-base bg-white hover:bg-brand-gray-200 active:bg-brand-gray-400"
           onClick={openModal}
