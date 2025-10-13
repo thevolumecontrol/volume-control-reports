@@ -1,8 +1,14 @@
-const API_URL = "https://xgwc-qwi9-r6ti.n7d.xano.io";
-const API_KEY = "api:CzX2YTxi";
-const BASE = `${API_URL.replace(/\/$/, "")}/${API_KEY}`;
+import { createFetchJson } from "./network";
 
-import { logRequest, logResponse, logError } from "./logger";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://xgwc-qwi9-r6ti.n7d.xano.io";
+const API_KEY = process.env.NEXT_PUBLIC_API_KEY || "api:CzX2YTxi";
+const AUTH_API_KEY = process.env.NEXT_PUBLIC_AUTH_API_KEY || "api:dTYn0fDP";
+const BASE = `${API_URL.replace(/\/$/, "")}/${API_KEY}`;
+const AUTH_BASE = `${API_URL.replace(/\/$/, "")}/${AUTH_API_KEY}`;
+
+// Create fetch functions for different bases
+const fetchJson = createFetchJson(BASE);
+const authFetchJson = createFetchJson(AUTH_BASE);
 
 export const endpoints = {
   queryStations: "/query_stations",
@@ -12,97 +18,9 @@ export const endpoints = {
   submitRequest: "/submit_request",
   // stripe checkout endpoint
   stripeCheckout: "/stripe/checkout",
+  // auth login endpoint
+  authLogin: "/auth/login",
 };
-
-// Simple in-memory TTL cache
-const CACHE = new Map(); // key -> { ts: number, ttl: number(ms), payload: any }
-
-function getCache(key) {
-  const entry = CACHE.get(key);
-  if (!entry) return null;
-  if (Date.now() - entry.ts > entry.ttl) {
-    CACHE.delete(key);
-    return null;
-  }
-  return entry.payload;
-}
-
-function setCache(key, payload, ttlMs) {
-  CACHE.set(key, { ts: Date.now(), ttl: ttlMs, payload });
-}
-
-async function fetchJson(path, method = "GET", init = {}, opts = {}) {
-  const url = `${BASE}${path.startsWith("/") ? path : `/${path}`}`;
-  const m = method.toUpperCase();
-  // pass init so logger can print request body / query params
-  const start = logRequest(m, url, init);
-
-  // opts.cacheTTL is in seconds
-  const cacheTTLsec = Number(opts.cacheTTL || 0);
-  const cacheKey = `${m}:${url}`;
-
-  // serve from cache for GET when TTL provided
-  if (m === "GET" && cacheTTLsec > 0) {
-    const cached = getCache(cacheKey);
-    if (cached !== null) {
-      // log cached response (development only inside logger)
-      try {
-        logResponse(m, url, 200, 0, JSON.stringify(cached));
-      } catch (e) {
-        // ignore logging errors
-      }
-      return cached;
-    }
-  }
-
-  try {
-    const res = await fetch(url, { method: m, headers: { Accept: "application/json" }, ...init });
-    const duration = Date.now() - start;
-    const text = await res.text().catch(() => null);
-
-    logResponse(m, url, res.status, duration, text);
-
-    if (!res.ok) {
-      // try to parse server error body (JSON) and include it on the thrown error
-      let parsed = null;
-      try {
-        parsed = text ? JSON.parse(text) : null;
-      } catch (e) {
-        parsed = null;
-      }
-
-      const serverMessage =
-        (parsed && (parsed.message || parsed.error || parsed.msg)) ||
-        text ||
-        res.statusText ||
-        `HTTP ${res.status}`;
-
-      const err = new Error(serverMessage);
-      // attach useful diagnostics for callers
-      err.status = res.status;
-      err.payload = parsed;
-
-      logError(m, url, err, duration, text);
-      throw err;
-    }
-
-    try {
-      const parsed = text ? JSON.parse(text) : null;
-      // store parsed JSON in cache if applicable
-      if (m === "GET" && cacheTTLsec > 0 && parsed !== null) {
-        setCache(cacheKey, parsed, cacheTTLsec * 1000);
-      }
-      return parsed;
-    } catch (e) {
-      logError(m, url, e, duration, text);
-      throw e;
-    }
-  } catch (err) {
-    const duration = Date.now() - start;
-    logError(m, url, err, duration, null);
-    throw err;
-  }
-}
 
 /**
  * getStations - cached for 120 minutes (7200 seconds)
@@ -210,4 +128,25 @@ export async function createStripeCheckout(song_id, customer_email, cancel_url =
 
   const path = `${endpoints.stripeCheckout}?${params.toString()}`;
   return fetchJson(path, "GET", {}, { cacheTTL: 0 });
+}
+
+/**
+ * authLogin - authenticate user with email and password
+ * - email: string
+ * - password: string
+ *
+ * Returns parsed JSON from the API (likely contains auth token).
+ */
+export async function authLogin(email, password) {
+  const body = {
+    email: String(email || ""),
+    password: String(password || "")
+  };
+
+  return authFetchJson(endpoints.authLogin, "POST", {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body)
+  }, { cacheTTL: 0 });
 }

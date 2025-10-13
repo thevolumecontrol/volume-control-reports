@@ -6,7 +6,7 @@ import Pagination from "./pagination/pagination";
 import PageNav from "./pagination/page-nav";
 import SearchBar from "@/components/table/search-bar";
 import FullReportModal from "@/components/modals/get-report-modal";
-import { getSongs } from "@/utils/api";
+import { getSongs } from "@/utils/network/api";
 import { formatDate } from "@/utils/date-formatter";
 import { useColumnResize } from "./header/column-resize";
 import { getSortByForRequest, createHeaderControls } from "../../utils/sorting";

@@ -6,7 +6,7 @@ import Button from "@/uikit/button/button";
 import { useNotification } from "@/providers/notification/notifications";
 import { formatDateShort } from "@/utils/date-formatter";
 import { isEmail } from "@/utils/validators";
-import { createStripeCheckout } from "@/utils/api";
+import { createStripeCheckout } from "@/utils/network/api";
 import IconCheckSimple from "@/uikit/icons/check-simple";
 import FileIcon from "@/uikit/icons/file";
 
