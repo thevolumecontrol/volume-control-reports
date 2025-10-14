@@ -1,13 +1,13 @@
 import generateMetadata from "@/utils/seo-metadata/static";
-import PageWrapper from "./page-wrapper";
+import Reports from "@/app/admin-reports/reports-page-wrapper";
 import { Metadata } from "@/common/config";
 
-export const metadata = generateMetadata(Metadata("/admin-login"));
+export const metadata = generateMetadata(Metadata("/admin-reports"));
 
 export default async function Page() {
   return (
     <>
-      <PageWrapper />
+      <Reports />
     </>
   );
 }
