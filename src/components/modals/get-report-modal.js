@@ -150,7 +150,7 @@ export default function FullReportModal({ isOpen, onClose, songId, title, artist
     return (
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <p className="text-sm text-gray-800">
-          The report will be available in the "Reports" tab.
+          The report will be available in the &quot;Reports&quot; tab.
         </p>
       </div>
     );
