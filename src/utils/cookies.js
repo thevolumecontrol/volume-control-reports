@@ -13,17 +13,15 @@ export const removeCookie = (name, options = {}) => {
   Cookies.remove(name, options);
 };
 
-export const setAuthCookies = (user, auth_token) => {
+export const setAuthCookies = (email, auth_token) => {
   const authPaths = ["/login", "/forgot-password", "/register"];
   const currentPath = window.location.pathname;
 
   setCookie("auth_token", auth_token);
-  setCookie("user_email", user.email);
-  setCookie("user_name", user.name);
+  setCookie("user_email", email);
 };
 
 export const logout = () => {
   removeCookie("auth_token");
   removeCookie("user_email");
-  removeCookie("user_name");
 };

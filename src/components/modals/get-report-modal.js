@@ -6,83 +6,141 @@ import Button from "@/uikit/button/button";
 import { useNotification } from "@/providers/notification/notifications";
 import { formatDateShort } from "@/utils/date-formatter";
 import { isEmail } from "@/utils/validators";
-import { createStripeCheckout } from "@/utils/network/api";
+import { createStripeCheckout, adminGetSongReport } from "@/utils/network/api";
+import { useAuth } from "@/utils/auth-service";
 import IconCheckSimple from "@/uikit/icons/check-simple";
 import FileIcon from "@/uikit/icons/file";
+import { STATIONS } from "@/common/config";
 
 const REPORT_DAYS = 28;
 
-const STATIONS = [
-  "Digital Dope Radio",
-  "Atlanta 285 FM",
-  "Blessed FM",
-  "Charlotte 77 FM",
-  "Chicago 94 FM",
-  "DMV 495 FM",
-  "Dallas 35 FM",
-  "+ 13 stations",
-];
-
-export default function FullReportModal({
-  isOpen,
-  onClose,
-  songId,
-  title,
-  artist,
-}) {
+export default function FullReportModal({ isOpen, onClose, songId, title, artist }) {
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { isAuthenticated, authToken } = useAuth();
   const { showNotification } = useNotification();
 
   const { startDateStr, endDateStr } = useMemo(() => {
-    // end on yesterday so the 28-day window ends yesterday
     const end = new Date();
-    end.setDate(end.getDate() - 1); // yesterday
+    end.setDate(end.getDate() - 1);
     const start = new Date(end);
-    start.setDate(end.getDate() - (REPORT_DAYS - 1)); // inclusive 28 days ending yesterday
+    start.setDate(end.getDate() - (REPORT_DAYS - 1));
     return {
       startDateStr: formatDateShort(start),
       endDateStr: formatDateShort(end),
     };
   }, []);
 
+  const validateEmail = () => {
+    if (!isAuthenticated) {
+      if (!email || String(email).trim() === "") {
+        setEmailError("Email is required field");
+        return false;
+      }
+      if (!isEmail(email)) {
+        setEmailError("Email is invalid");
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const handleUnauthorizedError = async () => {
+    console.log('Unauthorized access, logging out...');
+    const { logout } = await import('@/utils/auth-service');
+    logout();
+    if (typeof window !== "undefined") {
+      window.location.href = "/";
+    }
+  };
+
+  const handleAdminReport = async () => {
+    try {
+      const reportData = await adminGetSongReport(songId, authToken);
+      showNotification?.("success", "Report generated successfully");
+      onClose?.();
+    } catch (adminErr) {
+      if (adminErr.status === 401 || adminErr.status === 403) {
+        await handleUnauthorizedError();
+        return;
+      }
+      throw adminErr;
+    }
+  };
+
+  const handlePaymentReport = async () => {
+    const resp = await createStripeCheckout(
+      String(songId ?? ""),
+      String(email)
+    );
+
+    if (resp?.url && typeof window !== "undefined") {
+      window.location.href = resp.url;
+      return;
+    }
+
+    showNotification?.("success", "Checkout initiated");
+    onClose?.();
+  };
+
+  const handleError = (err) => {
+    console.error("Report generation error:", err);
+    const msg =
+      (err && (err.message || (err.payload && err.payload.message))) ||
+      "There was an error generating the report. Please try again.";
+    showNotification?.("error", msg);
+  };
+
   const handleGetReport = async (e) => {
     e?.preventDefault();
-
-    if (!email || String(email).trim() === "") {
-      setEmailError("Email is requiered field");
-      return;
-    }
-    if (!isEmail(email)) {
-      setEmailError("Email is invalid");
-      return;
-    }
+    if (!validateEmail()) return;
 
     setLoading(true);
     try {
-      const resp = await createStripeCheckout(
-        String(songId ?? ""),
-        String(email)
-      );
-
-      if (resp?.url && typeof window !== "undefined") {
-        window.location.href = resp.url;
-        return;
-      }
-
-      // fallback: if server didn't return a redirect URL, show success notification and close
-      showNotification?.("success", "Checkout initiated");
-      onClose?.();
+      isAuthenticated ? await handleAdminReport() : await handlePaymentReport();
     } catch (err) {
-      console.error("createStripeCheckout error:", err);
-      const msg =
-        (err && (err.message || (err.payload && err.payload.message))) ||
-        "There was an error creating checkout. Please try again.";
-      showNotification?.("error", msg);
+      handleError(err);
     } finally {
       setLoading(false);
     }
+  };
+
+  const renderEmailInput = () => {
+    if (isAuthenticated) return null;
+    
+    return (
+      <>
+        <Input
+          label="Email address"
+          type="plain"
+          value={email}
+          placeholder="Email"
+          onChange={(e) => {
+            setEmail(e.target.value);
+            if (emailError) setEmailError("");
+          }}
+          onFocus={() => {
+            if (emailError) setEmailError("");
+          }}
+          required
+          disabled={loading}
+        />
+        {emailError && <div className="text-sm text-red-500">{emailError}</div>}
+      </>
+    );
+  };
+
+  const renderInfoText = () => {
+    if (!isAuthenticated) return null;
+    
+    return (
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <p className="text-sm text-gray-800">
+          The report will be available in the "Reports" tab.
+        </p>
+      </div>
+    );
   };
 
   return (
@@ -123,23 +181,8 @@ export default function FullReportModal({
       </div>
 
       <form onSubmit={handleGetReport} className="w-full flex flex-col gap-6">
-        <Input
-          label="Email address"
-          type="plain"
-          value={email}
-          placeholder="Email"
-          onChange={(e) => {
-            setEmail(e.target.value);
-            if (emailError) setEmailError("");
-          }}
-          onFocus={() => {
-            if (emailError) setEmailError("");
-          }}
-          required
-          disabled={loading}
-        />
-
-        {emailError && <div className="text-sm text-red-500">{emailError}</div>}
+        {renderEmailInput()}
+        {renderInfoText()}
 
         <Button
           type="submit"
@@ -150,7 +193,7 @@ export default function FullReportModal({
           loading={loading}
           disabled={loading}
         >
-          Get report - $20
+          {isAuthenticated ? "Get report" : "Get report - $20"}
         </Button>
       </form>
     </Modal>

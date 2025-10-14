@@ -41,8 +41,14 @@ export default function Login({ onSubmit, loading = false }) {
     onSubmit?.({ email: email.trim(), password });
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !loading) {
+      handleSubmit(e);
+    }
+  };
+
   return (
-    <form className="w-full max-w-sm mx-auto" onSubmit={handleSubmit}>
+    <form className="w-full max-w-sm mx-auto" onSubmit={handleSubmit} onKeyDown={handleKeyDown}>
       <Input
         label="Email"
         type="email"
