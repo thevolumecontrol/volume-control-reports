@@ -2,11 +2,12 @@
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import TableHeader from "./header/table-header";
 import TableData from "./table-data";
+import MobileTableList from "./mobile-table-list";
 import Pagination from "./pagination/pagination";
 import PageNav from "./pagination/page-nav";
 import SearchBar from "@/components/table/search-bar";
 import FullReportModal from "@/components/modals/get-report-modal";
-import { getSongs } from "@/utils/api";
+import { getSongs } from "@/utils/network/api";
 import { formatDate } from "@/utils/date-formatter";
 import { useColumnResize } from "./header/column-resize";
 import { getSortByForRequest, createHeaderControls } from "../../utils/sorting";
@@ -16,6 +17,7 @@ export default function Table({ station }) {
   const [searchInput, setSearchInput] = useState("");
   const [files, setFiles] = useState([]);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -58,12 +60,14 @@ export default function Table({ station }) {
     if (!station) {
       setFiles([]);
       setError(null);
+      setLoading(false);
       return;
     }
 
     let mounted = true;
     const fetchFiles = async () => {
       setError(null);
+      setLoading(true);
       try {
         const sortBy = getSortByForRequest(countsDir, lastPlayedDir);
         const { items, meta } = await getSongs(
@@ -83,6 +87,8 @@ export default function Table({ station }) {
       } catch (e) {
         console.error("fetchFiles error:", e);
         if (mounted) setError(e?.message ?? "Failed to load files");
+      } finally {
+        if (mounted) setLoading(false);
       }
     };
 
@@ -171,50 +177,64 @@ export default function Table({ station }) {
         {error && <div className="text-sm text-red-500">Error: {error}</div>}
 
         <div className="flex items-end justify-between gap-4">
-          <div className="flex-none w-96">
+          <div className="flex-none w-full sm:w-96">
             <SearchBar onSearch={handleSearchInput} />
           </div>
 
           <div className="ml-4">
-            <Pagination
-              onPrev={handlePrev}
-              onNext={handleNext}
-              disabledPrev={prevPage == null}
-              disabledNext={nextPage == null}
-              currentPage={currentPage}
-              totalPages={totalPages}
-            />
+            <div className="hidden sm:block">
+              <Pagination
+                onPrev={handlePrev}
+                onNext={handleNext}
+                disabledPrev={prevPage == null}
+                disabledNext={nextPage == null}
+                currentPage={currentPage}
+                totalPages={totalPages}
+              />
+            </div>
           </div>
         </div>
 
-        <div>
+        <div className={`transition-opacity duration-300 ${loading ? 'opacity-50' : 'opacity-100'}`}>
           {files.length > 0 ? (
-            <div className="w-full overflow-auto bg-white rounded-md shadow-sm border border-neutral-200">
-              <div ref={tableRef} className="w-full">
-                <table
-                  className="min-w-full table-fixed"
-                  style={{ tableLayout: "fixed", width: "100%" }}
-                >
-                  <colgroup>
-                    {colWidths.map((w, i) => (
-                      <col key={i} style={{ width: `${w}%` }} />
-                    ))}
-                  </colgroup>
+            <>
+              {/* Desktop Table */}
+              <div className="hidden sm:block w-full overflow-auto bg-white rounded-md shadow-sm border border-neutral-200">
+                <div ref={tableRef} className="w-full">
+                  <table
+                    className="min-w-full table-fixed"
+                    style={{ tableLayout: "fixed", width: "100%" }}
+                  >
+                    <colgroup>
+                      {colWidths.map((w, i) => (
+                        <col key={i} style={{ width: `${w}%` }} />
+                      ))}
+                    </colgroup>
 
-                  <TableHeader
-                    colWidths={colWidths}
-                    headerControls={headerControls}
-                    onStartResize={startResize}
-                  />
+                    <TableHeader
+                      colWidths={colWidths}
+                      headerControls={headerControls}
+                      onStartResize={startResize}
+                    />
 
-                  <TableData
-                    data={tableData}
-                    searchTerm={searchInput}
-                    onGetReport={handleGetReport}
-                  />
-                </table>
+                    <TableData
+                      data={tableData}
+                      searchTerm={searchInput}
+                      onGetReport={handleGetReport}
+                    />
+                  </table>
+                </div>
               </div>
-            </div>
+              
+              {/* Mobile Cards */}
+              <div className="sm:hidden">
+                <MobileTableList
+                  data={tableData}
+                  searchTerm={searchInput}
+                  onGetReport={handleGetReport}
+                />
+              </div>
+            </>
           ) : (
             <div className="py-12 text-center text-neutral-500 select-none">
               Nothing to show...

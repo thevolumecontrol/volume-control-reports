@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 .dropdown-list {
-  @apply absolute flex flex-col gap-1 p-1 bg-white shadow-l rounded z-[9999] overflow-hidden; /* was rounded-2xl */
+  @apply absolute flex flex-col gap-1 p-1 bg-white shadow-l rounded z-[9999] overflow-hidden;
 }
 
 .dropdown-scroll {

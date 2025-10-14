@@ -1,10 +1,10 @@
-
 import Link from "next/link";
 import Image from "next/image";
+import AdminTag from "@/components/admin/admin-tag";
 
 export default function NavBar() {
   return (
-    <nav className="nav-bar">
+    <nav className="nav-bar flex items-center justify-between">
       <Link href="/">
         <Image
           src="/volume-control-logo.png"
@@ -13,6 +13,7 @@ export default function NavBar() {
           height={40}
         />
       </Link>
+      <AdminTag />
     </nav>
   );
 }

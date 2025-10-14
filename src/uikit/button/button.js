@@ -1,11 +1,9 @@
 "use client";
+
 export default function Button({
-  // `type` kept for backward compatibility (was used for style),
-  // but if it's not one of style keys and looks like "submit"/"button"/"reset"
-  // treat it as HTML button `type`.
   type = "black",
   variant,
-  htmlType = "button", // explicit prop for HTML type
+  htmlType = "button",
   size = "m",
   disabled = false,
   onClick,
@@ -31,6 +29,8 @@ export default function Button({
   const sizeStyles = {
     s: "px-3 py-1 text-sm",
     m: "px-4 py-2",
+    l: "px-5 py-3 text-lg",
+    xs: "px-2 py-1 text-xs",
   };
 
   // decide which prop is style vs html type
@@ -69,10 +69,9 @@ export default function Button({
       className={classNameFinal}
       onClick={onClick}
       disabled={disabled || loading}
-      {...rest} // safe: we already removed custom props via destructuring
+      {...rest}
     >
       {loading ? (
-        // simple inline spinner
         <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
       ) : null}
       {children}

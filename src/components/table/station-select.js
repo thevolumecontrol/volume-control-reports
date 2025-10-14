@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Selector from "@/uikit/selector";
-import { getStations } from "@/utils/api";
+import { getStations } from "@/utils/network/api";
 
 export default function StationSelect({ value, onChange, className = "" }) {
   const [stations, setStations] = useState([]);
