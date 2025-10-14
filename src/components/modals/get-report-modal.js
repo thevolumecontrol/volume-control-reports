@@ -11,6 +11,7 @@ import { useAuth } from "@/utils/auth-service";
 import IconCheckSimple from "@/uikit/icons/check-simple";
 import FileIcon from "@/uikit/icons/file";
 import { STATIONS } from "@/common/config";
+import ReportReadyModal from "./report-ready-modal";
 
 const REPORT_DAYS = 28;
 
@@ -18,6 +19,8 @@ export default function FullReportModal({ isOpen, onClose, songId, title, artist
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [reportReadyOpen, setReportReadyOpen] = useState(false);
+  const [reportDownloadUrl, setReportDownloadUrl] = useState("");
   const { isAuthenticated, authToken } = useAuth();
   const { showNotification } = useNotification();
 
@@ -58,8 +61,18 @@ export default function FullReportModal({ isOpen, onClose, songId, title, artist
   const handleAdminReport = async () => {
     try {
       const reportData = await adminGetSongReport(songId, authToken);
-      showNotification?.("success", "Report generated successfully");
-      onClose?.();
+      
+      // Extract download URL from response
+      const downloadUrl = reportData?.document;
+      
+      if (downloadUrl) {
+        setReportDownloadUrl(downloadUrl);
+        setReportReadyOpen(true);
+        onClose?.(); // Close the main modal
+      } else {
+        showNotification?.("success", "Report generated successfully");
+        onClose?.();
+      }
     } catch (adminErr) {
       if (adminErr.status === 401 || adminErr.status === 403) {
         await handleUnauthorizedError();
@@ -143,59 +156,72 @@ export default function FullReportModal({ isOpen, onClose, songId, title, artist
     );
   };
 
+  const handleReportReadyClose = () => {
+    setReportReadyOpen(false);
+    setReportDownloadUrl("");
+  };
+
   return (
-    <Modal
-      isOpen={!!isOpen}
-      onClose={onClose}
-      title={`${title} by ${artist}`}
-      size="m"
-    >
-      <div className="bg-neutral-100 w-full p-4 rounded-xl flex flex-col gap-4">
-        <div className="flex w-full items-center justify-between">
-          <div className="flex flex-row gap-1 items-center">
-            <FileIcon size={24} />
-            <p className="font-semibold">PDF Report</p>
-          </div>
-          <p className="text-sm">{`${startDateStr} – ${endDateStr}`}</p>
-        </div>
-        <div className="divider" />
-
-        <div className="grid grid-cols-2 gap-2">
-          {STATIONS.map((station, idx) => (
-            <div key={idx} className="flex flex-row gap-1 items-center">
-              <div className="size-6 flex items-center justify-center">
-                <div className="size-4 rounded-sm flex items-center justify-center cursor-pointer transition-all duration-200 ease-in-out text-white bg-blue-500">
-                  <IconCheckSimple size={24} />
-                </div>
-              </div>
-              <span
-                className={`text-sm ${
-                  station === "+ 13 stations" ? "font-semibold" : ""
-                }`}
-              >
-                {station}
-              </span>
+    <>
+      <Modal
+        isOpen={!!isOpen}
+        onClose={onClose}
+        title={`${title} by ${artist}`}
+        size="m"
+      >
+        <div className="bg-neutral-100 w-full p-4 rounded-xl flex flex-col gap-4">
+          <div className="flex w-full items-center justify-between">
+            <div className="flex flex-row gap-1 items-center">
+              <FileIcon size={24} />
+              <p className="font-semibold">PDF Report</p>
             </div>
-          ))}
+            <p className="text-sm">{`${startDateStr} – ${endDateStr}`}</p>
+          </div>
+          <div className="divider" />
+
+          <div className="grid grid-cols-2 gap-2">
+            {STATIONS.map((station, idx) => (
+              <div key={idx} className="flex flex-row gap-1 items-center">
+                <div className="size-6 flex items-center justify-center">
+                  <div className="size-4 rounded-sm flex items-center justify-center cursor-pointer transition-all duration-200 ease-in-out text-white bg-blue-500">
+                    <IconCheckSimple size={24} />
+                  </div>
+                </div>
+                <span
+                  className={`text-sm ${
+                    station === "+ 13 stations" ? "font-semibold" : ""
+                  }`}
+                >
+                  {station}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
 
-      <form onSubmit={handleGetReport} className="w-full flex flex-col gap-6">
-        {renderEmailInput()}
-        {renderInfoText()}
+        <form onSubmit={handleGetReport} className="w-full flex flex-col gap-6">
+          {renderEmailInput()}
+          {renderInfoText()}
 
-        <Button
-          type="submit"
-          variant="black"
-          size="m"
-          fullWidth
-          onClick={handleGetReport}
-          loading={loading}
-          disabled={loading}
-        >
-          {isAuthenticated ? "Get report" : "Get report - $20"}
-        </Button>
-      </form>
-    </Modal>
+          <Button
+            type="submit"
+            variant="black"
+            size="m"
+            fullWidth
+            onClick={handleGetReport}
+            loading={loading}
+            disabled={loading}
+          >
+            {isAuthenticated ? "Get report" : "Get report - $20"}
+          </Button>
+        </form>
+      </Modal>
+
+      <ReportReadyModal
+        isOpen={reportReadyOpen}
+        onClose={handleReportReadyClose}
+        downloadUrl={reportDownloadUrl}
+      />
+    </>
   );
 }

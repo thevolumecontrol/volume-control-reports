@@ -24,7 +24,7 @@ export default function ReportCard({ report, onDownload }) {
           <div className="sm:mt-2">
             <Button
               variant="secondary"
-              size="s"
+              size="m"
               onClick={() => onDownload(report.pdf_report.url)}
               className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-3"
             >

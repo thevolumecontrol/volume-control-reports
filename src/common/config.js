@@ -1,11 +1,11 @@
 export function Metadata(url) {
     return {
-        title: "Volume Control | Admin Dashboard",
+        title: "Volume Control | Radio Reporting System",
         description:
-            "Manage your volume settings with ease. Control audio levels, adjust settings, and enhance your listening experience with our intuitive dashboard.",
+            "Check songs and tracks across the Volume Control radio stations network. Get instant PDF reports with just a few clicks.",
         url: url,
         keywords:
-            "volume control, audio settings, admin dashboard, user preferences, sound management",
+            "volume control, audio settings, radio reporting system, user preferences, sound management",
     }
 }
 
