@@ -98,7 +98,7 @@ export async function createStripeCheckout(song_id, customer_email, cancel_url =
   if (success_url != null) params.set("success_url", String(success_url));
 
   const path = `${endpoints.stripeCheckout}?${params.toString()}`;
-  return fetchJson(path, "GET", {}, { cacheTTL: 0 });
+  return adminFetchJson(path, "GET", {}, { cacheTTL: 0 });
 }
 
 export async function authLogin(email, password) {
