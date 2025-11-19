@@ -158,7 +158,8 @@ export default function Table({ station }) {
               ? `${totalCount} (${liveCount} live dj spins)`
               : String(totalCount);
 
-          console.log("playedTotalDisplay:", playedTotalDisplay); // Debug log
+          // Extract songId from the correct path
+          const songId = f._raw?.song?.id ?? f.song?.id ?? f.id ?? f.song_id ?? "";
 
           return [
             f.song?.title ?? f.title ?? "",
@@ -168,7 +169,7 @@ export default function Table({ station }) {
             f.song?.genre ?? f.genre ?? "",
             f.song?.isrc ?? f.isrc ?? "",
             {
-              songId: f.song?.id ?? f.id ?? f.song_id ?? "",
+              songId: songId,
               title: f.song?.title ?? f.title ?? "",
               artist: f.song?.artist ?? f.artist ?? "",
             },

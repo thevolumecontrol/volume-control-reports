@@ -20,6 +20,7 @@ export default function TableData({
         >
           {row.map((cellText, cIdx) => {
             const isActionCol = cIdx === row.length - 1;
+
             return (
               <TableCell
                 key={cIdx}

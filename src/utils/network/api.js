@@ -2,8 +2,12 @@ import { createFetchJson } from "./network";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 const BASE = `${API_URL.replace(/\/$/, "")}/${process.env.NEXT_PUBLIC_API_KEY}`;
-const AUTH_BASE = `${API_URL.replace(/\/$/, "")}/${process.env.NEXT_PUBLIC_AUTH_API_KEY}`;
-const ADMIN_BASE = `${API_URL.replace(/\/$/, "")}/${process.env.NEXT_PUBLIC_ADMIN_API_KEY}`;
+const AUTH_BASE = `${API_URL.replace(/\/$/, "")}/${
+  process.env.NEXT_PUBLIC_AUTH_API_KEY
+}`;
+const ADMIN_BASE = `${API_URL.replace(/\/$/, "")}/${
+  process.env.NEXT_PUBLIC_ADMIN_API_KEY
+}`;
 
 const fetchJson = createFetchJson(BASE);
 const authFetchJson = createFetchJson(AUTH_BASE);
@@ -24,12 +28,20 @@ export const endpoints = {
 };
 
 export async function getStations() {
-  const json = await fetchJson(endpoints.queryStations, "GET", {}, { cacheTTL: 120 * 60 });
+  const json = await fetchJson(
+    endpoints.queryStations,
+    "GET",
+    {},
+    { cacheTTL: 120 * 60 }
+  );
   const list = Array.isArray(json?.data) ? json.data : [];
   return list
     .map((s) => {
       if (!s) return null;
-      return { label: s.name ?? String(s.id ?? ""), value: String(s.id ?? s.name ?? "") };
+      return {
+        label: s.name ?? String(s.id ?? ""),
+        value: String(s.id ?? s.name ?? ""),
+      };
     })
     .filter(Boolean);
 }
@@ -83,8 +95,16 @@ export async function submitContact(topic, email, message) {
   return fetchJson(path, "GET", {}, { cacheTTL: 0 });
 }
 
-export async function createStripeCheckout(song_id, customer_email, cancel_url = null, success_url = null) {
-  if ((cancel_url == null || success_url == null) && typeof window !== "undefined") {
+export async function createStripeCheckout(
+  song_id,
+  customer_email,
+  cancel_url = null,
+  success_url = null
+) {
+  if (
+    (cancel_url == null || success_url == null) &&
+    typeof window !== "undefined"
+  ) {
     const origin = window.location.origin;
     const pathname = window.location.pathname || "/";
     if (cancel_url == null) cancel_url = `${origin}/`;
@@ -93,7 +113,8 @@ export async function createStripeCheckout(song_id, customer_email, cancel_url =
 
   const params = new URLSearchParams();
   if (song_id != null) params.set("song_id", String(song_id));
-  if (customer_email != null) params.set("customer_email", String(customer_email));
+  if (customer_email != null)
+    params.set("customer_email", String(customer_email));
   if (cancel_url != null) params.set("cancel_url", String(cancel_url));
   if (success_url != null) params.set("success_url", String(success_url));
 
@@ -104,28 +125,42 @@ export async function createStripeCheckout(song_id, customer_email, cancel_url =
 export async function authLogin(email, password) {
   const body = {
     email: String(email || ""),
-    password: String(password || "")
+    password: String(password || ""),
   };
 
-  return authFetchJson(endpoints.authLogin, "POST", {
-    headers: {
-      "Content-Type": "application/json",
+  return authFetchJson(
+    endpoints.authLogin,
+    "POST",
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
     },
-    body: JSON.stringify(body)
-  }, { cacheTTL: 0 });
+    { cacheTTL: 0 }
+  );
 }
 
 export async function adminGetSongReport(songId, authToken) {
+  if (!songId) {
+    throw new Error("songId is required");
+  }
+
   const params = new URLSearchParams();
-  if (songId != null) params.set("song_id", String(songId));
-  
+  params.set("song_id", String(songId));
+
   const path = `${endpoints.adminGetSongReport}?${params.toString()}`;
-  
-  return adminFetchJson(path, "GET", {
-    headers: {
-      "Authorization": `Bearer ${authToken}`,
-    }
-  }, { cacheTTL: 0 });
+
+  return adminFetchJson(
+    path,
+    "GET",
+    {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    },
+    { cacheTTL: 0 }
+  );
 }
 
 /**
@@ -136,10 +171,15 @@ export async function adminGetSongReport(songId, authToken) {
  */
 export async function adminQuerySongReports(authToken) {
   const path = endpoints.adminQuerySongReports;
-  
-  return adminFetchJson(path, "GET", {
-    headers: {
-      "Authorization": `Bearer ${authToken}`,
-    }
-  }, { cacheTTL: 0 });
+
+  return adminFetchJson(
+    path,
+    "GET",
+    {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    },
+    { cacheTTL: 0 }
+  );
 }
