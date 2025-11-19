@@ -145,22 +145,35 @@ export default function Table({ station }) {
     handleHeaderToggle
   );
 
-  // Direct mapping without transformation
+  // Direct mapping with live stream formatting
   const tableData =
     files.length > 0
-      ? files.map((f) => [
-          f.title,
-          f.artist,
-          formatDate(f.last_played_at),
-          String(f.counts_all_time ?? 0),
-          f.genre,
-          f.isrc,
-          {
-            songId: f._raw?.song?.id ?? f.id ?? f.song_id ?? "",
-            title: f.title ?? f._raw?.song?.title ?? "",
-            artist: f.artist ?? f._raw?.song?.artist ?? "",
-          },
-        ])
+      ? files.map((f) => {
+          const totalCount = f.counts_all_time ?? 0;
+          const liveCount = f._raw?.count_live_streams ?? 0;
+
+          // Format played total with live streams info
+          const playedTotalDisplay =
+            liveCount > 0
+              ? `${totalCount} (${liveCount} live dj spins)`
+              : String(totalCount);
+
+          console.log("playedTotalDisplay:", playedTotalDisplay); // Debug log
+
+          return [
+            f.song?.title ?? f.title ?? "",
+            f.song?.artist ?? f.artist ?? "",
+            formatDate(f.last_played_at),
+            playedTotalDisplay,
+            f.song?.genre ?? f.genre ?? "",
+            f.song?.isrc ?? f.isrc ?? "",
+            {
+              songId: f.song?.id ?? f.id ?? f.song_id ?? "",
+              title: f.song?.title ?? f.title ?? "",
+              artist: f.song?.artist ?? f.artist ?? "",
+            },
+          ];
+        })
       : Array.from({ length: 10 }, () => [
           " ",
           " ",
@@ -195,7 +208,11 @@ export default function Table({ station }) {
           </div>
         </div>
 
-        <div className={`transition-opacity duration-300 ${loading ? 'opacity-50' : 'opacity-100'}`}>
+        <div
+          className={`transition-opacity duration-300 ${
+            loading ? "opacity-50" : "opacity-100"
+          }`}
+        >
           {files.length > 0 ? (
             <>
               {/* Desktop Table */}
@@ -225,7 +242,7 @@ export default function Table({ station }) {
                   </table>
                 </div>
               </div>
-              
+
               {/* Mobile Cards */}
               <div className="sm:hidden">
                 <MobileTableList
