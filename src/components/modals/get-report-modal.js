@@ -7,7 +7,9 @@ import { useNotification } from "@/providers/notification/notifications";
 import { formatDateShort } from "@/utils/date-formatter";
 import { isEmail } from "@/utils/validators";
 import { createStripeCheckout, adminGetSongReport } from "@/utils/network/api";
-import { useAuth } from "@/utils/auth-service";
+import { useUser } from "@/providers/user/user-provider";
+import { getCookie } from "@/utils/cookies";
+import { logout } from "@/utils/auth-service";
 import IconCheckSimple from "@/uikit/icons/check-simple";
 import FileIcon from "@/uikit/icons/file";
 import { STATIONS } from "@/common/config";
@@ -15,13 +17,19 @@ import ReportReadyModal from "./report-ready-modal";
 
 const REPORT_DAYS = 28;
 
-export default function FullReportModal({ isOpen, onClose, songId, title, artist }) {
+export default function FullReportModal({
+  isOpen,
+  onClose,
+  songId,
+  title,
+  artist,
+}) {
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
   const [loading, setLoading] = useState(false);
   const [reportReadyOpen, setReportReadyOpen] = useState(false);
   const [reportDownloadUrl, setReportDownloadUrl] = useState("");
-  const { isAuthenticated, authToken } = useAuth();
+  const { isVisitor, setIsVisitor } = useUser();
   const { showNotification } = useNotification();
 
   const { startDateStr, endDateStr } = useMemo(() => {
@@ -36,7 +44,7 @@ export default function FullReportModal({ isOpen, onClose, songId, title, artist
   }, []);
 
   const validateEmail = () => {
-    if (!isAuthenticated) {
+    if (isVisitor) {
       if (!email || String(email).trim() === "") {
         setEmailError("Email is required field");
         return false;
@@ -50,21 +58,22 @@ export default function FullReportModal({ isOpen, onClose, songId, title, artist
   };
 
   const handleUnauthorizedError = async () => {
-    console.log('Unauthorized access, logging out...');
-    const { logout } = await import('@/utils/auth-service');
+    console.log("Unauthorized access, logging out...");
     logout();
+    setIsVisitor(true);
     if (typeof window !== "undefined") {
       window.location.href = "/";
     }
   };
 
   const handleAdminReport = async () => {
+    const authToken = getCookie("auth_token");
     try {
       const reportData = await adminGetSongReport(songId, authToken);
-      
+
       // Extract download URL from response
       const downloadUrl = reportData?.document;
-      
+
       if (downloadUrl) {
         setReportDownloadUrl(downloadUrl);
         setReportReadyOpen(true);
@@ -111,7 +120,7 @@ export default function FullReportModal({ isOpen, onClose, songId, title, artist
 
     setLoading(true);
     try {
-      isAuthenticated ? await handleAdminReport() : await handlePaymentReport();
+      !isVisitor ? await handleAdminReport() : await handlePaymentReport();
     } catch (err) {
       handleError(err);
     } finally {
@@ -120,8 +129,8 @@ export default function FullReportModal({ isOpen, onClose, songId, title, artist
   };
 
   const renderEmailInput = () => {
-    if (isAuthenticated) return null;
-    
+    if (!isVisitor) return null;
+
     return (
       <>
         <Input
@@ -145,8 +154,8 @@ export default function FullReportModal({ isOpen, onClose, songId, title, artist
   };
 
   const renderInfoText = () => {
-    if (!isAuthenticated) return null;
-    
+    if (isVisitor) return null;
+
     return (
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <p className="text-sm text-gray-800">
@@ -212,7 +221,7 @@ export default function FullReportModal({ isOpen, onClose, songId, title, artist
             loading={loading}
             disabled={loading}
           >
-            {isAuthenticated ? "Get report" : "Get report - $20"}
+            {!isVisitor ? "Get report" : "Get report - $20"}
           </Button>
         </form>
       </Modal>

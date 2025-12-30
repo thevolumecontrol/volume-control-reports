@@ -3,10 +3,10 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/uikit/button/button";
 import Tag from "@/uikit/button/tag";
-import { useAuth } from "@/utils/auth-service";
+import { useUser } from "@/providers/user/user-provider";
 
 export default function AdminTag() {
-  const { isAuthenticated,  } = useAuth();
+  const { isVisitor } = useUser();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
 
@@ -18,7 +18,7 @@ export default function AdminTag() {
     router.push("/admin-reports");
   };
 
-  if (!mounted || !isAuthenticated) {
+  if (!mounted || isVisitor) {
     return null;
   }
 

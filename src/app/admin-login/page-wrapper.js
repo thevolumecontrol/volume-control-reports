@@ -4,11 +4,13 @@ import { useRouter } from "next/navigation";
 import Login from "@/components/login/login";
 import { authLogin } from "@/utils/network/api";
 import authService from "@/utils/auth-service";
+import { useUser } from "@/providers/user/user-provider";
 import { useNotification } from "@/providers/notification/notifications";
 
-export default function LoginPage() {
+export default function PageWrapper() {
   const [loading, setLoading] = useState(false);
   const { showNotification } = useNotification();
+  const { refreshUserState } = useUser();
   const router = useRouter();
 
   const handleLogin = async ({ email, password }) => {
@@ -24,6 +26,7 @@ export default function LoginPage() {
         const loginSuccess = authService.performLogin(email, authToken);
 
         if (loginSuccess) {
+          refreshUserState(); // Refresh user state after login
           showNotification("success", "Successfully logged in!");
           router.push("/");
         } else {

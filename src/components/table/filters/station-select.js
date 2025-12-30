@@ -17,10 +17,15 @@ export default function StationSelect({ value, onChange, className = "" }) {
       try {
         const list = await getStations();
         if (mounted) {
-          setStations(list);
-          // Auto-select first station if none selected
-          if (!value && list.length > 0) {
-            onChange(list[0].value);
+          // Add "All stations" as the first option
+          const stationsWithAll = [
+            { value: "", label: "All stations" },
+            ...list,
+          ];
+          setStations(stationsWithAll);
+          // Auto-select "All stations" if none selected
+          if (!value) {
+            onChange("");
           }
         }
       } catch (e) {
@@ -38,7 +43,7 @@ export default function StationSelect({ value, onChange, className = "" }) {
   }, []);
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-4">
       {error && <div className="text-sm text-red-500">Error: {error}</div>}
       <div className={`flex-none w-56 ${className}`}>
         <Selector

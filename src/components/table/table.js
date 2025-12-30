@@ -10,9 +10,9 @@ import FullReportModal from "@/components/modals/get-report-modal";
 import { getSongs } from "@/utils/network/api";
 import { formatDate } from "@/utils/date-formatter";
 import { useColumnResize } from "./header/column-resize";
-import { getSortByForRequest, createHeaderControls } from "../../utils/sorting";
+import { getSortByForRequest, createHeaderControls } from "./filters/sorting";
 
-export default function Table({ station }) {
+export default function Table({ station, dj }) {
   const wrapperRef = useRef(null);
   const [searchInput, setSearchInput] = useState("");
   const [files, setFiles] = useState([]);
@@ -46,7 +46,7 @@ export default function Table({ station }) {
     setSearchInput("");
     setCountsDir("desc");
     setLastPlayedDir(null);
-  }, [station]);
+  }, [station, dj]);
 
   const handleSearchInput = useCallback((text) => {
     setSearchInput(text ?? "");
@@ -57,7 +57,7 @@ export default function Table({ station }) {
 
   // Fetch data
   useEffect(() => {
-    if (!station) {
+    if (station === null || station === undefined) {
       setFiles([]);
       setError(null);
       setLoading(false);
@@ -74,7 +74,8 @@ export default function Table({ station }) {
           station,
           currentPage,
           sortBy,
-          searchInput
+          searchInput,
+          dj
         );
 
         if (mounted) {
@@ -96,7 +97,7 @@ export default function Table({ station }) {
     return () => {
       mounted = false;
     };
-  }, [station, currentPage, countsDir, lastPlayedDir, searchInput]);
+  }, [station, currentPage, countsDir, lastPlayedDir, searchInput, dj]);
 
   const handlePrev = () => prevPage != null && setCurrentPage(prevPage);
   const handleNext = () => nextPage != null && setCurrentPage(nextPage);
@@ -159,7 +160,8 @@ export default function Table({ station }) {
               : String(totalCount);
 
           // Extract songId from the correct path
-          const songId = f._raw?.song?.id ?? f.song?.id ?? f.id ?? f.song_id ?? "";
+          const songId =
+            f._raw?.song?.id ?? f.song?.id ?? f.id ?? f.song_id ?? "";
 
           return [
             f.song?.title ?? f.title ?? "",

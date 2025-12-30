@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import AdminTag from "@/components/admin/admin-tag";
+import AdminTag from "@/components/nav-bar/admin-buttons";
 
 export default function NavBar() {
   return (

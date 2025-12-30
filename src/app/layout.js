@@ -4,6 +4,7 @@ import "../styles/global.css";
 import NavBar from "@/components/nav-bar";
 import Footer from "@/components/footer";
 import { NotificationProvider } from "@/providers/notification/notifications";
+import { UserProvider } from "@/providers/user/user-provider";
 import ContactCTA from "@/components/modals/contact-us";
 
 const inter = Inter({
@@ -16,12 +17,14 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning className={`${inter.variable}`}>
       <body>
-        <NotificationProvider>
-          <NavBar />
-          <main>{children}</main>
-          <Footer />
-          <ContactCTA />
-        </NotificationProvider>
+        <UserProvider>
+          <NotificationProvider>
+            <NavBar />
+            <main>{children}</main>
+            <Footer />
+            <ContactCTA />
+          </NotificationProvider>
+        </UserProvider>
       </body>
     </html>
   );

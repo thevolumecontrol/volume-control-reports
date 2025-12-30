@@ -14,14 +14,11 @@ const authFetchJson = createFetchJson(AUTH_BASE);
 const adminFetchJson = createFetchJson(ADMIN_BASE);
 
 export const endpoints = {
-  queryStations: "/query_stations",
-  // keep base path; page_id and sortBy will be appended as query params by getSongs
-  querySongs: (stationId) => `/query_songs/${encodeURIComponent(stationId)}`,
-  // new: submit contact request
-  submitRequest: "/submit_request",
-  // stripe checkout endpoint
+  queryStations: "/stations/query",
+  queryDjs: "/djs/query",
+  querySongs: "/songs/query",
+  submitRequest: "/support/request",
   stripeCheckout: "/stripe/checkout",
-  // auth login endpoint
   authLogin: "/auth/login",
   adminGetSongReport: "/admin/get_song_report",
   adminQuerySongReports: "/admin/query_song_reports",
@@ -46,14 +43,40 @@ export async function getStations() {
     .filter(Boolean);
 }
 
-export async function getSongs(stationId, pageId = 1, sortBy = null) {
+export async function getDJs() {
+  const json = await fetchJson(
+    endpoints.queryDjs,
+    "GET",
+    {},
+    { cacheTTL: 120 * 60 }
+  );
+  const list = Array.isArray(json?.data) ? json.data : [];
+  return list
+    .map((dj) => {
+      if (!dj) return null;
+      return {
+        label: dj.name ?? String(dj.id ?? ""),
+        value: String(dj.id ?? ""),
+      };
+    })
+    .filter(Boolean);
+}
+
+export async function getSongs(stationId, pageId = 1, sortBy = null, searchInput = null, djId = null) {
   // optional searchInput appended as query param
-  const basePath = endpoints.querySongs(stationId);
+  const basePath = endpoints.querySongs;
   const params = new URLSearchParams();
+  // Add station_id as query parameter (empty string for all stations)
+  if (stationId != null && String(stationId).trim() !== "") {
+    params.set("station_id", String(stationId));
+  }
+  // Add dj_id as query parameter
+  if (djId != null && String(djId).trim() !== "") {
+    params.set("dj_id", String(djId));
+  }
   params.set("page_id", String(pageId));
   if (sortBy) params.set("sortBy", String(sortBy));
-  // support fourth param (searchInput)
-  const searchInput = arguments.length >= 4 ? arguments[3] : null;
+  // support searchInput param
   if (searchInput != null && String(searchInput).trim() !== "") {
     params.set("search_input", String(searchInput));
   }
