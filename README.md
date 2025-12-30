@@ -22,7 +22,6 @@ To merge feature branch into staging:
 4. Push to staging (git push origin staging)
 
 To push changes to main Github branch:
-
 1. Sync everything on staging (commit)
 2. Switch to the main branch (git checkout main)
 3. Merge changes (git merge staging)
