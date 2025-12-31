@@ -6,7 +6,8 @@ import Button from "@/uikit/button/button";
 import { useNotification } from "@/providers/notification/notifications";
 import { formatDateShort } from "@/utils/date-formatter";
 import { isEmail } from "@/utils/validators";
-import { createStripeCheckout, adminGetSongReport } from "@/utils/network/api";
+import { createStripeCheckout } from "@/network/actions-api";
+import { adminGetSongReport } from "@/network/reports-api";
 import { useUser } from "@/providers/user/user-provider";
 import { getCookie } from "@/utils/cookies";
 import { logout } from "@/utils/auth-service";
@@ -67,9 +68,8 @@ export default function FullReportModal({
   };
 
   const handleAdminReport = async () => {
-    const authToken = getCookie("auth_token");
     try {
-      const reportData = await adminGetSongReport(songId, authToken);
+      const reportData = await adminGetSongReport(songId);
 
       // Extract download URL from response
       const downloadUrl = reportData?.document;

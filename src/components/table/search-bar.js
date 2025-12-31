@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import SearchIcon from "@/uikit/icons/search";
+import CancelIcon from "@/uikit/icons/cancel";
 
 export default function SearchBar({
   placeholder = "Search...",
@@ -31,7 +32,7 @@ export default function SearchBar({
     <div
       // when focused -> do NOT apply hover darkening; otherwise allow hover:bg-neutral-200
       className={`w-full max-w-xl h-10.5 rounded-md px-3 flex items-center gap-2 shadow-base border-standard transition-colors ${
-        !isFocused ? "hover:bg-neutral-200" : ""
+        !isFocused ? "hover:bg-neutral-200/50" : ""
       } focus-within:bg-neutral-100`}
       aria-hidden="false"
       onClick={() => {
@@ -63,29 +64,9 @@ export default function SearchBar({
           type="button"
           aria-label="Clear search"
           onClick={handleClear}
-          className="flex-none rounded-md p-1 hover:bg-neutral-200 transition-colors cursor-pointer"
+          className="flex-none rounded-md hover:bg-neutral-200 transition-colors cursor-pointer text-neutral-600"
         >
-          <svg
-            className="w-4 h-4 text-neutral-600"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden="true"
-          >
-            <path
-              d="M18 6L6 18"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M6 6L18 18"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <CancelIcon size={24} />
         </button>
       )}
     </div>

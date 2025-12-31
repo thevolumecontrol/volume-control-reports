@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import TableCell from "./table-cell";
-import GetFullReportButton from "./get-report-button";
+import GetFullReportButton from "./get-song-report-button";
 
 export default function TableData({
   data,

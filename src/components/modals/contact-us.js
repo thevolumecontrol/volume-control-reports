@@ -6,7 +6,7 @@ import Input from "@/uikit/input/input";
 import Selector from "@/uikit/selector";
 import { useNotification } from "@/providers/notification/notifications";
 import ChatIcon from "@/uikit/icons/chat-icon";
-import { submitContact } from "@/utils/network/api";
+import { submitContact } from "@/network/actions-api";
 
 export default function ContactCTA() {
   const [isOpen, setIsOpen] = useState(false);
@@ -138,8 +138,7 @@ export default function ContactCTA() {
             placeholder="Enter your message here"
           />
           <Button
-            type="submit"
-            variant="primary"
+            variant="black"
             size="m"
             fullWidth
             onClick={handleSubmit}

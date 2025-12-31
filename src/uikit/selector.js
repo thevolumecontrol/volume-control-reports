@@ -2,6 +2,7 @@
 import Dropdown from "./dropdown/dropdown";
 import IconCheckSimple from "@/uikit/icons/check-simple";
 import DownIcon from "@/uikit/icons/down";
+import CancelIcon from "@/uikit/icons/cancel";
 import "./input/input.css";
 
 export default function Selector({
@@ -15,6 +16,7 @@ export default function Selector({
   visible = true,
   multiSelect = false,
   maxSelections = null,
+  clearable = false,
 }) {
   const selectorStyles = `input ${error ? "border-red-400 ring-red-400" : ""}`;
 
@@ -23,6 +25,22 @@ export default function Selector({
       ? { label: option.label, value: option.value }
       : { label: option, value: option }
   );
+
+  const handleClear = (e) => {
+    e.stopPropagation();
+    if (multiSelect) {
+      onChange([]);
+    } else {
+      onChange("");
+    }
+  };
+
+  const hasValue = () => {
+    if (multiSelect && Array.isArray(value)) {
+      return value.length > 0;
+    }
+    return value !== "" && value != null;
+  };
 
   const handleOptionClick = (option, closeDropdown) => {
     if (multiSelect) {
@@ -67,8 +85,7 @@ export default function Selector({
   };
 
   const toggleContent = (
-    <button
-      type="button"
+    <div
       className={`${selectorStyles} cursor-pointer flex items-center gap-2 justify-between`}
     >
       <div className="truncate">
@@ -78,10 +95,27 @@ export default function Selector({
           <span className="text-neutral-400 truncate">{placeholder}</span>
         )}
       </div>
-      <div className="flex-none ml-2">
+      <div className="flex items-center gap-1 flex-none ml-2">
+        {clearable && hasValue() && (
+          <div
+            role="button"
+            tabIndex={0}
+            aria-label="Clear selection"
+            onClick={handleClear}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleClear(e);
+              }
+            }}
+            className="flex-none rounded-md hover:bg-neutral-200 transition-colors cursor-pointer text-neutral-600 p-0.5"
+          >
+            <CancelIcon size={20} />
+          </div>
+        )}
         <DownIcon size={18} className="text-neutral-500" />
       </div>
-    </button>
+    </div>
   );
 
   return (

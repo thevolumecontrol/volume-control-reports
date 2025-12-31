@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Login from "@/components/login/login";
-import { authLogin } from "@/utils/network/api";
+import { authLogin } from "@/network/auth-api";
 import authService from "@/utils/auth-service";
 import { useUser } from "@/providers/user/user-provider";
 import { useNotification } from "@/providers/notification/notifications";
@@ -19,7 +19,8 @@ export default function PageWrapper() {
       const response = await authLogin(email, password);
 
       // Check if we got an auth token
-      const authToken = response?.auth_token || response?.token || response?.access_token;
+      const authToken =
+        response?.auth_token || response?.token || response?.access_token;
 
       if (authToken) {
         // Set cookies and redirect
@@ -33,14 +34,18 @@ export default function PageWrapper() {
           showNotification("error", "Login failed. Please try again later.");
         }
       } else {
-        showNotification("error", "Login failed. Invalid credentials or server response.");
+        showNotification(
+          "error",
+          "Login failed. Invalid credentials or server response."
+        );
       }
     } catch (error) {
       let errorMessage;
       if (error.status === 500) {
         errorMessage = "Server error. Please try again later.";
       } else {
-        errorMessage = "Login failed. Please check your credentials and try again.";
+        errorMessage =
+          "Login failed. Please check your credentials and try again.";
       }
       showNotification("error", errorMessage);
     } finally {

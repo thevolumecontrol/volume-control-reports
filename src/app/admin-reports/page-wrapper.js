@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { adminQuerySongReports } from "@/utils/network/api";
+import { adminQuerySongReports } from "@/network/reports-api";
 import { useUser } from "@/providers/user/user-provider";
 import { getCookie } from "@/utils/cookies";
 import { useNotification } from "@/providers/notification/notifications";
@@ -37,7 +37,6 @@ export default function Reports() {
   }, [mounted, isVisitor]);
 
   const handleUnauthorizedError = async () => {
-    console.log("Unauthorized access, logging out...");
     // Clear auth cookies
     if (typeof document !== "undefined") {
       const expireDate = "Thu, 01 Jan 1970 00:00:00 UTC";
@@ -54,12 +53,9 @@ export default function Reports() {
 
     setLoading(true);
     try {
-      const reportsData = await adminQuerySongReports(authToken);
+      const reportsData = await adminQuerySongReports();
       setReports(reportsData?.data?.items || []);
-      console.log("Reports fetched:", reportsData);
     } catch (error) {
-      console.error("Failed to fetch reports:", error);
-
       // Handle unauthorized errors
       if (error.status === 401 || error.status === 403) {
         await handleUnauthorizedError();

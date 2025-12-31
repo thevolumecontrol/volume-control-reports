@@ -26,14 +26,10 @@ export default function GetFullReportButton({
   };
 
   return (
-    <Button
-      type="button"
-      onClick={handle}
-      variant="black"
-      size="s"
-      className={`text-xm px-2 py-0.5 rounded-md transition-colors duration-150 ${className}`}
-    >
-      Get report
-    </Button>
+    <div className={className}>
+      <Button type="button" onClick={handle} variant="black" size="s">
+        Get report
+      </Button>
+    </div>
   );
 }
