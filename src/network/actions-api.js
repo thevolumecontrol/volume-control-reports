@@ -127,6 +127,7 @@ export async function getSongs(
       genre: song.genre ?? "",
       isrc: song.isrc ?? "",
       counts_all_time: item.counts_all_time ?? 0,
+      counts_live_streams: item.counts_live_streams ?? 0,
       last_played_at: item.last_played_at ?? null,
       _raw: item,
     };

@@ -151,7 +151,7 @@ export default function Table({ station, dj }) {
     files.length > 0
       ? files.map((f) => {
           const totalCount = f.counts_all_time ?? 0;
-          const liveCount = f._raw?.count_live_streams ?? 0;
+          const liveCount = f.counts_live_streams ?? 0;
 
           // Format played total with live streams info
           const playedTotalDisplay =
