@@ -1,3 +1,5 @@
+Reports production wiring (Cloudflare + Xano, Aug 2025/2026): see [docs/REPORTS_HANDOFF.md](docs/REPORTS_HANDOFF.md).
+
 To get updates from staging branch:
 
 1. Make sure you're on staging branch (git checkout staging)
