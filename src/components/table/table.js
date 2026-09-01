@@ -150,14 +150,22 @@ export default function Table({ station, dj }) {
   const tableData =
     files.length > 0
       ? files.map((f) => {
-          const totalCount = f.counts_all_time ?? 0;
-          const liveCount = f.counts_live_streams ?? 0;
+          const totalCount = Number(f.counts_all_time ?? 0) || 0;
+          const liveCount =
+            Number(
+              f.counts_live_streams ??
+                f.count_live_streams ??
+                f._raw?.counts_live_streams ??
+                f._raw?.count_live_streams ??
+                0
+            ) || 0;
+          const rotationCount = Math.max(0, totalCount - liveCount);
 
-          // Format played total with live streams info
+          // Station rotation outside (); live DJ spins inside ().
           const playedTotalDisplay =
             liveCount > 0
-              ? `${totalCount} (${liveCount} live dj spins)`
-              : String(totalCount);
+              ? `${rotationCount} (${liveCount} live dj spins)`
+              : String(rotationCount || totalCount);
 
           // Extract songId from the correct path
           const songId =
