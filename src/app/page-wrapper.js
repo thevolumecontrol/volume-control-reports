@@ -12,6 +12,10 @@ export default function PageWrapper() {
   return (
     <>
       <div className="flex flex-col gap-4">
+        <div className="flex items-baseline justify-between gap-4 border-b border-neutral-200 pb-3">
+          <h1 className="text-2xl font-bold text-[#1e4b8e]">Custom Chart Report</h1>
+          <p className="text-sm text-neutral-500">Rank · Artist · Title · Year · Spins · Live DJ</p>
+        </div>
         <Filters station={station} onStationChange={setStation} dj={dj} onDjChange={setDj} />
 
         {<Table station={station} dj={dj} />}

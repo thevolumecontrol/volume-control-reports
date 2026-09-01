@@ -121,7 +121,7 @@ export default function Table({ station, dj }) {
   };
 
   const handleHeaderToggle = (headerLabel) => {
-    if (headerLabel === "Played Total") {
+    if (headerLabel === "Played Total" || headerLabel === "Spins") {
       setCountsDir((prev) =>
         prev === "desc" ? "asc" : prev === "asc" ? "desc" : "desc"
       );
@@ -149,7 +149,7 @@ export default function Table({ station, dj }) {
   // Direct mapping with live stream formatting
   const tableData =
     files.length > 0
-      ? files.map((f) => {
+      ? files.map((f, idx) => {
           const totalCount = Number(f.counts_all_time ?? 0) || 0;
           const liveCount =
             Number(
@@ -171,13 +171,22 @@ export default function Table({ station, dj }) {
           const songId =
             f._raw?.song?.id ?? f.song?.id ?? f.id ?? f.song_id ?? "";
 
+          const lastPlayed = f.last_played_at ? new Date(f.last_played_at) : null;
+          const year =
+            lastPlayed && !Number.isNaN(lastPlayed.getTime())
+              ? String(lastPlayed.getFullYear())
+              : "";
+          const rank = (currentPage - 1) * 50 + idx + 1;
+
           return [
-            f.song?.title ?? f.title ?? "",
+            String(rank),
             f.song?.artist ?? f.artist ?? "",
+            f.song?.title ?? f.title ?? "",
+            year,
+            String(rotationCount || totalCount),
+            liveCount > 0 ? String(liveCount) : "—",
             formatDate(f.last_played_at),
-            playedTotalDisplay,
             f.song?.genre ?? f.genre ?? "",
-            f.song?.isrc ?? f.isrc ?? "",
             {
               songId: songId,
               title: f.song?.title ?? f.title ?? "",
@@ -192,6 +201,8 @@ export default function Table({ station, dj }) {
           " ",
           " ",
           " ",
+          " ",
+          " ",
           { songId: "", title: "", artist: "" },
         ]);
 
@@ -199,6 +210,16 @@ export default function Table({ station, dj }) {
     <>
       <div ref={wrapperRef} className="flex flex-col gap-4">
         {error && <div className="text-sm text-red-500">Error: {error}</div>}
+
+        <div className="bg-[#1e4b8e] text-white px-4 py-3">
+          <div className="text-[11px] uppercase tracking-[0.18em] text-blue-100">
+            Volume Control Chart
+          </div>
+          <div className="text-xl font-bold leading-tight">Panel by rank</div>
+          <div className="text-xs text-blue-100 mt-1">
+            Ranked by spins. Live DJ plays are listed separately from station rotation.
+          </div>
+        </div>
 
         <div className="flex items-end justify-between gap-4">
           <div className="flex-none w-full sm:w-96">

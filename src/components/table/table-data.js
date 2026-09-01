@@ -15,8 +15,12 @@ export default function TableData({
         <tr
           key={rIdx}
           className={`${
-            rIdx % 2 === 1 ? "bg-neutral-50" : ""
-          } hover:bg-neutral-100 group relative`}
+            rIdx < 10
+              ? "bg-amber-50"
+              : rIdx % 2 === 1
+                ? "bg-neutral-50"
+                : "bg-white"
+          } hover:bg-sky-50 group relative text-[13px]`}
         >
           {row.map((cellText, cIdx) => {
             const isActionCol = cIdx === row.length - 1;
@@ -28,7 +32,9 @@ export default function TableData({
                 highlight={searchTerm}
                 innerOverflowVisible={isActionCol}
               >
-                {isActionCol ? (
+                {cIdx === 0 ? (
+                  <span className="font-bold text-[#1e4b8e]">{cellText}</span>
+                ) : isActionCol ? (
                   <div className="relative overflow-visible w-full h-full">
                     <GetFullReportButton
                       id={cellText}

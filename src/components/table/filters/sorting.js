@@ -10,9 +10,9 @@ export function getSortByForRequest(countsDir, lastPlayedDir) {
 
 export function createHeaderControls(countsDir, lastPlayedDir, onToggle) {
   return {
-    "Played Total": {
+    Spins: {
       direction: countsDir,
-      onToggle: () => onToggle("Played Total"),
+      onToggle: () => onToggle("Spins"),
     },
     "Last played": {
       direction: lastPlayedDir,

@@ -15,12 +15,12 @@ export default function TableHeader({
           const ths = [];
           for (let i = 0; i < HEADERS.length; i++) {
             const h = HEADERS[i];
-            if (h === "ISRC") {
+            if (false && h === "ISRC") {
               ths.push(
                 <th
                   key={i}
                   colSpan={2}
-                  className="bg-neutral-100 px-4 py-3 border-b border-neutral-200 text-sm font-medium text-neutral-700 text-left relative"
+                  className="bg-[#1e4b8e] px-2 py-2 border-b border-[#16376b] text-[11px] font-bold uppercase tracking-wide text-white text-left relative"
                   style={{
                     verticalAlign: "middle",
                     minWidth: `${minPercent}%`,
@@ -56,7 +56,7 @@ export default function TableHeader({
             ths.push(
               <th
                 key={i}
-                className="bg-neutral-100 px-4 py-3 border-b border-neutral-200 text-sm font-medium text-neutral-700 text-left relative"
+                className="bg-[#1e4b8e] px-2 py-2 border-b border-[#16376b] text-[11px] font-bold uppercase tracking-wide text-white text-left relative"
                 style={{ verticalAlign: "middle", minWidth: `${minPercent}%` }}
               >
                 {headerControls[h] ? (

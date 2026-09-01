@@ -1,23 +1,27 @@
 import { useRef, useState, useCallback } from "react";
 
 const HEADERS = [
-  "Title",
+  "Rank",
   "Artist",
+  "Title",
+  "Year",
+  "Spins",
+  "Live DJ",
   "Last played",
-  "Played Total",
   "Genre",
-  "ISRC",
   "",
 ];
 
 const DEFAULT_WIDTHS = {
-  Title: 27.5,
-  Artist: 22.5,
-  "Last played": 17.5,
-  "Played Total": 10,
-  Genre: 10,
-  ISRC: 5,
-  "": 7.5,
+  Rank: 6,
+  Artist: 20,
+  Title: 24,
+  Year: 7,
+  Spins: 10,
+  "Live DJ": 8,
+  "Last played": 13,
+  Genre: 7,
+  "": 5,
 };
 
 const calculateInitialWidths = () => {

@@ -30,12 +30,12 @@ export default function TableHeaderCell({
           onToggle();
         }
       }}
-      className="flex items-center gap-2 px-1 py-1 rounded-md hover:bg-neutral-200 cursor-pointer select-none"
+      className="flex items-center gap-2 px-1 py-1 rounded-md hover:bg-white/10 cursor-pointer select-none"
     >
       <span className="flex-none">
         <Icon />
       </span>
-      <span className="truncate text-sm text-neutral-700">{label}</span>
+      <span className="truncate text-[11px] font-bold uppercase tracking-wide text-white">{label}</span>
     </div>
   );
 }
