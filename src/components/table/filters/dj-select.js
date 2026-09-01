@@ -1,30 +1,24 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Selector from "@/uikit/selector";
-import GetDjReportButton from "@/components/table/get-dj-report-button";
 import { getDJs } from "@/network/actions-api";
 
 export default function DjSelect({ value, onChange }) {
   const [djs, setDjs] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [query, setQuery] = useState("");
   const [error, setError] = useState(null);
 
   useEffect(() => {
     let mounted = true;
     const fetchDJs = async () => {
-      setLoading(true);
       setError(null);
       try {
         const list = await getDJs();
-        if (mounted) {
-          setDjs(list);
-        }
+        if (mounted) setDjs(list);
       } catch (e) {
         console.error("fetchDJs error:", e);
         if (mounted) setError(e?.message ?? "Failed to load DJs");
-      } finally {
-        if (mounted) setLoading(false);
       }
     };
 
@@ -34,26 +28,33 @@ export default function DjSelect({ value, onChange }) {
     };
   }, []);
 
-  return (
-    <div className="flex flex-row gap-4 items-end">
-      <div className="flex flex-col gap-2">
-        {error && <div className="text-sm text-red-500">Error: {error}</div>}
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return djs;
+    return djs.filter((dj) =>
+      String(dj.label || "").toLowerCase().includes(q)
+    );
+  }, [djs, query]);
 
-        <div className="flex-none w-56">
-          <Selector
-            value={value}
-            onChange={onChange}
-            options={djs}
-            placeholder="Choose a DJ"
-            clearable
-          />
-        </div>
+  return (
+    <div className="flex flex-col gap-2">
+      {error && <div className="text-sm text-red-500">Error: {error}</div>}
+      <input
+        type="search"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Search DJs"
+        className="w-56 bg-white border border-neutral-200 rounded-lg px-3 py-2 text-sm"
+      />
+      <div className="flex-none w-56">
+        <Selector
+          value={value}
+          onChange={onChange}
+          options={filtered}
+          placeholder="Choose a DJ"
+          clearable
+        />
       </div>
-      {value && (
-        <div>
-          <GetDjReportButton djId={value} />
-        </div>
-      )}
     </div>
   );
 }
