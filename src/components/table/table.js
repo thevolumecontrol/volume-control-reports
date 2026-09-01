@@ -257,7 +257,20 @@ export default function Table({ station, dj }) {
             </>
           ) : (
             <div className="py-12 text-center text-neutral-500 select-none">
-              Nothing to show...
+              {loading ? (
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-8 h-8 border-2 border-neutral-300 border-t-red-600 rounded-full animate-spin" />
+                  <p className="text-base text-neutral-700">
+                    Database is loading. Play counts are coming in…
+                  </p>
+                  <p className="text-sm text-neutral-500 max-w-md">
+                    All-stations view has to add up every station. Pick one
+                    station from the list for a faster result.
+                  </p>
+                </div>
+              ) : (
+                "Nothing to show..."
+              )}
             </div>
           )}
         </div>
