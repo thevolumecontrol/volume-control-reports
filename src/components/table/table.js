@@ -248,7 +248,7 @@ export default function Table({ station, dj }) {
           {files.length > 0 ? (
             <>
               {/* Desktop Table */}
-              <div className="hidden sm:block w-full overflow-auto bg-white rounded-md shadow-sm border border-neutral-200">
+              <div className="w-full overflow-auto bg-white rounded-md shadow-sm border border-neutral-200">
                 <div ref={tableRef} className="w-full">
                   <table
                     className="min-w-full table-fixed"
