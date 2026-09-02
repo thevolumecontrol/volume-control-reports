@@ -8,13 +8,14 @@ export default function MobileTableList({ data, searchTerm, onGetReport }) {
       {data.map((row, rIdx) => {
         const songData = row[row.length - 1];
         const rank = row[0];
-        const artist = row[1];
-        const title = row[2];
-        const year = row[3];
-        const spins = row[4];
-        const liveDj = row[5];
-        const lastPlayed = row[6];
-        const genre = row[7];
+        const station = row[1];
+        const artist = row[2];
+        const title = row[3];
+        const year = row[4];
+        const spins = row[5];
+        const liveDj = row[6];
+        const lastPlayed = row[7];
+        const genre = row[8];
 
         if (!songData || typeof songData !== "object" || !songData.songId) {
           return null;
@@ -24,7 +25,7 @@ export default function MobileTableList({ data, searchTerm, onGetReport }) {
           <MobileTableCard
             key={rIdx}
             title={`${rank}. ${title}`}
-            artist={artist}
+            artist={`${artist} · ${station}`}
             lastPlayed={lastPlayed}
             totalPlayed={liveDj && liveDj !== "—" ? `${spins} (${liveDj} live dj)` : String(spins)}
             genre={genre}

@@ -2,6 +2,7 @@ import { useRef, useState, useCallback } from "react";
 
 const HEADERS = [
   "Rank",
+  "Station",
   "Artist",
   "Title",
   "Year",
@@ -13,13 +14,14 @@ const HEADERS = [
 ];
 
 const DEFAULT_WIDTHS = {
-  Rank: 6,
-  Artist: 20,
-  Title: 24,
-  Year: 7,
-  Spins: 10,
-  "Live DJ": 8,
-  "Last played": 13,
+  Rank: 5,
+  Station: 14,
+  Artist: 16,
+  Title: 20,
+  Year: 6,
+  Spins: 8,
+  "Live DJ": 7,
+  "Last played": 11,
   Genre: 7,
   "": 5,
 };

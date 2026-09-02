@@ -7,17 +7,18 @@ import Pagination from "./pagination/pagination";
 import PageNav from "./pagination/page-nav";
 import SearchBar from "@/components/table/search-bar";
 import FullReportModal from "@/components/modals/get-report-modal";
-import { getSongs } from "@/network/actions-api";
+import { getSongs, getStations } from "@/network/actions-api";
 import { formatDate } from "@/utils/date-formatter";
 import { useColumnResize } from "./header/column-resize";
 import { getSortByForRequest, createHeaderControls } from "./filters/sorting";
 
-export default function Table({ station, dj }) {
+export default function Table({ station, dj, onStationChange }) {
   const wrapperRef = useRef(null);
   const [searchInput, setSearchInput] = useState("");
   const [files, setFiles] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [stations, setStations] = useState([]);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -36,6 +37,19 @@ export default function Table({ station, dj }) {
 
   const { colWidths, tableRef, startResize } = useColumnResize();
 
+  useEffect(() => {
+    let mounted = true;
+    getStations()
+      .then((list) => {
+        if (mounted) setStations(list || []);
+      })
+      .catch(() => {});
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+
   // Reset when station changes
   useEffect(() => {
     setCurrentPage(1);
@@ -49,11 +63,20 @@ export default function Table({ station, dj }) {
   }, [station, dj]);
 
   const handleSearchInput = useCallback((text) => {
-    setSearchInput(text ?? "");
+    const q = (text ?? "").trim();
+    setSearchInput(q);
     setCountsDir("desc");
     setLastPlayedDir(null);
     setCurrentPage(1);
-  }, []);
+    if (q && typeof onStationChange === "function") {
+      const hit = stations.find((st) =>
+        String(st.label || "").toLowerCase().includes(q.toLowerCase())
+      );
+      if (hit && String(hit.value) !== String(station || "")) {
+        onStationChange(String(hit.value));
+      }
+    }
+  }, [stations, station, onStationChange]);
 
   // Fetch data
   useEffect(() => {
@@ -177,9 +200,13 @@ export default function Table({ station, dj }) {
               ? String(lastPlayed.getFullYear())
               : "";
           const rank = (currentPage - 1) * 50 + idx + 1;
+          const stationLabel =
+            (stations.find((st) => String(st.value) === String(station || "")) || {}).label ||
+            (station ? String(station) : "All stations");
 
           return [
             String(rank),
+            stationLabel,
             f.song?.artist ?? f.artist ?? "",
             f.song?.title ?? f.title ?? "",
             year,
@@ -194,17 +221,7 @@ export default function Table({ station, dj }) {
             },
           ];
         })
-      : Array.from({ length: 10 }, () => [
-          " ",
-          " ",
-          " ",
-          " ",
-          " ",
-          " ",
-          " ",
-          " ",
-          { songId: "", title: "", artist: "" },
-        ]);
+      : Array.from({ length: 10 }, () => [" "," "," "," "," "," "," "," "," ",{ songId: "", title: "", artist: "" }]);
 
   return (
     <>
