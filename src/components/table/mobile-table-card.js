@@ -47,7 +47,7 @@ export default function MobileTableCard({
   };
 
   return (
-    <div className="bg-white py-4">
+    <div className="bg-white py-4 cursor-pointer" onClick={handleGetReport}>
       <div className="flex-1 min-w-0">
           <h3 className="text-lg font-semibold text-gray-900 mb-1 break-words">
             {renderWithHighlight(title, searchTerm)}

@@ -9,7 +9,7 @@ import SearchBar from "@/components/table/search-bar";
 import FullReportModal from "@/components/modals/get-report-modal";
 import { getSongs, getStations } from "@/network/actions-api";
 import { formatDate } from "@/utils/date-formatter";
-import { useColumnResize } from "./header/column-resize";
+import { HEADERS } from "./header/column-resize";
 import { getSortByForRequest, createHeaderControls } from "./filters/sorting";
 
 
@@ -83,7 +83,24 @@ export default function Table({ station, dj, onStationChange }) {
     artist: "",
   });
 
-  const { colWidths, tableRef, startResize } = useColumnResize();
+  const DEFAULT_ON = ["Title", "Artist", "Time"];
+  const [visible, setVisible] = useState(() => new Set(DEFAULT_ON));
+  const toggleColumn = (name) => {
+    setVisible((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) {
+        if (next.size === 1) return prev;
+        next.delete(name);
+      } else {
+        next.add(name);
+      }
+      return next;
+    });
+  };
+  const visibleIndexes = HEADERS
+    .map((h, i) => (h && visible.has(h) ? i : -1))
+    .filter((i) => i >= 0);
+  const visibleHeaders = visibleIndexes.map((i) => HEADERS[i]);
 
   useEffect(() => {
     let mounted = true;
@@ -312,32 +329,40 @@ export default function Table({ station, dj, onStationChange }) {
         >
           {files.length > 0 ? (
             <>
+              <div className="flex flex-wrap gap-2">
+                {HEADERS.filter(Boolean).map((name) => {
+                  const on = visible.has(name);
+                  return (
+                    <button
+                      key={name}
+                      type="button"
+                      onClick={() => toggleColumn(name)}
+                      className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
+                        on
+                          ? "bg-[#1e4b8e] text-white border-[#1e4b8e]"
+                          : "bg-white text-neutral-500 border-neutral-300"
+                      }`}
+                    >
+                      {name}
+                    </button>
+                  );
+                })}
+              </div>
+
               {/* Desktop Table */}
-              <div className="w-full overflow-auto bg-white rounded-md shadow-sm border border-neutral-200">
-                <div ref={tableRef} className="w-full">
-                  <table
-                    className="min-w-full table-fixed"
-                    style={{ tableLayout: "fixed", width: "100%" }}
-                  >
-                    <colgroup>
-                      {colWidths.map((w, i) => (
-                        <col key={i} style={{ width: `${w}%` }} />
-                      ))}
-                    </colgroup>
-
-                    <TableHeader
-                      colWidths={colWidths}
-                      headerControls={headerControls}
-                      onStartResize={startResize}
-                    />
-
-                    <TableData
-                      data={tableData}
-                      searchTerm={searchInput}
-                      onGetReport={handleGetReport}
-                    />
-                  </table>
-                </div>
+              <div className="hidden sm:block w-full overflow-auto bg-white rounded-md shadow-sm border border-neutral-200">
+                <table className="min-w-full" style={{ width: "100%" }}>
+                  <TableHeader
+                    headers={visibleHeaders}
+                    headerControls={headerControls}
+                  />
+                  <TableData
+                    data={tableData}
+                    visibleIndexes={visibleIndexes}
+                    searchTerm={searchInput}
+                    onGetReport={handleGetReport}
+                  />
+                </table>
               </div>
 
               {/* Mobile Cards */}
