@@ -7,6 +7,7 @@ import FileIcon from "@/uikit/icons/file";
 export default function MobileTableCard({ 
   title, 
   artist, 
+  station,
   lastPlayed, 
   totalPlayed, 
   genre, 
@@ -48,19 +49,25 @@ export default function MobileTableCard({
   return (
     <div className="bg-white py-4">
       <div className="flex-1 min-w-0">
-          <h3 className="text-m text-gray-900 mb-4 break-words">
-            {renderWithHighlight(title, searchTerm)} by {renderWithHighlight(artist, searchTerm)}
+          <h3 className="text-lg font-semibold text-gray-900 mb-1 break-words">
+            {renderWithHighlight(title, searchTerm)}
           </h3>
-          <div className="flex flex-col gap-2 mb-4">
+          <p className="text-sm text-gray-700 mb-3 break-words">
+            {renderWithHighlight(artist, searchTerm)}
+          </p>
+          <div className="grid grid-cols-2 gap-2 mb-4">
             <p className="text-sm">
-              <span className="text-gray-500">🕞 Last played: </span>
-              <span className="text-gray-900">{formatDate(lastPlayed)}</span>
+              <span className="text-gray-500 block text-xs uppercase tracking-wide">Spins</span>
+              <span className="text-gray-900 font-semibold">{totalPlayed}</span>
             </p>
             <p className="text-sm">
-              <span className="text-gray-500">🔄 Total played: </span>
-              <span className="text-gray-900">{totalPlayed}</span>
+              <span className="text-gray-500 block text-xs uppercase tracking-wide">Time</span>
+              <span className="text-gray-900 font-semibold">{formatDate(lastPlayed)}</span>
             </p>
           </div>
+          {station ? (
+            <p className="text-xs text-gray-500 mb-3">Station {station}</p>
+          ) : null}
           <Button
             variant="black"
             size="m"

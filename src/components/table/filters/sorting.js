@@ -14,6 +14,10 @@ export function createHeaderControls(countsDir, lastPlayedDir, onToggle) {
       direction: countsDir,
       onToggle: () => onToggle("Spins"),
     },
+    Time: {
+      direction: lastPlayedDir,
+      onToggle: () => onToggle("Time"),
+    },
     "Last played": {
       direction: lastPlayedDir,
       onToggle: () => onToggle("Last played"),

@@ -12,6 +12,54 @@ import { formatDate } from "@/utils/date-formatter";
 import { useColumnResize } from "./header/column-resize";
 import { getSortByForRequest, createHeaderControls } from "./filters/sorting";
 
+
+const STATION_LETTERS = {
+  "atl 285 fm": "ATL",
+  "chicago 94 fm": "CHI",
+  "charlotte 77 fm": "CLT",
+  "detroit 313 fm": "DET",
+  "dmv 495 fm": "DMV",
+  "houston 610 fm": "HOU",
+  "la 405 fm": "LA",
+  "kc 70 fm": "KC",
+  "nyc 212 fm": "NYC",
+  "miami 305 fm": "MIA",
+  "memphis 40 fm": "MEM",
+  "mile high fm": "DEN",
+  "philly 76 fm": "PHL",
+  "phoenix 101 fm": "PHX",
+  "stl 66 fm": "STL",
+  "dallas 35 fm": "DAL",
+  "tha culture 808 fm": "808",
+  "digital dope radio": "DDR",
+  "otown 407 fm": "OTO",
+  "805 breaking djs": "SD",
+  "blessed fm": "BLSD",
+  "zaytown global radio": "ZAY",
+  "strip club radio": "SCR",
+  "all talk fm": "ATK",
+  "volume control lagos": "LOS",
+  "volume control accra": "ACC",
+  "volume control abidjan": "ABJ",
+  "volume control dakar": "DKR",
+  "volume control johannesburg": "JHB",
+  "volume control cape town": "CPT",
+  "volume control lusaka": "LUN",
+  "volume control london": "LON",
+  "volume control paris": "PAR",
+  "volume control berlin": "BER",
+  "all stations": "ALL",
+};
+
+function stationLetters(label) {
+  const key = String(label || "").trim().toLowerCase();
+  if (!key) return "";
+  if (STATION_LETTERS[key]) return STATION_LETTERS[key];
+  const first = key.split(/\s+/)[0];
+  if (/^[a-z]{2,4}$/.test(first)) return first.toUpperCase();
+  return key.replace(/[^a-z0-9]/g, "").slice(0, 3).toUpperCase();
+}
+
 export default function Table({ station, dj, onStationChange }) {
   const wrapperRef = useRef(null);
   const [searchInput, setSearchInput] = useState("");
@@ -149,7 +197,7 @@ export default function Table({ station, dj, onStationChange }) {
         prev === "desc" ? "asc" : prev === "asc" ? "desc" : "desc"
       );
       setLastPlayedDir(null);
-    } else if (headerLabel === "Last played") {
+    } else if (headerLabel === "Last played" || headerLabel === "Time") {
       setLastPlayedDir((prev) =>
         prev === "desc" ? "asc" : prev === "asc" ? "desc" : "desc"
       );
@@ -206,13 +254,13 @@ export default function Table({ station, dj, onStationChange }) {
 
           return [
             String(rank),
-            stationLabel,
-            f.song?.artist ?? f.artist ?? "",
             f.song?.title ?? f.title ?? "",
-            year,
+            f.song?.artist ?? f.artist ?? "",
             String(rotationCount || totalCount),
-            liveCount > 0 ? String(liveCount) : "—",
             formatDate(f.last_played_at),
+            stationLetters(stationLabel),
+            liveCount > 0 ? String(liveCount) : "—",
+            year,
             f.song?.genre ?? f.genre ?? "",
             {
               songId: songId,
