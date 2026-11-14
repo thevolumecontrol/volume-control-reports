@@ -83,7 +83,7 @@ export default function Table({ station, dj, onStationChange }) {
     artist: "",
   });
 
-  const DEFAULT_ON = ["Title", "Artist", "Time"];
+  const DEFAULT_ON = ["Title", "Artist", "Spins", "Time"];
   const [visible, setVisible] = useState(() => new Set(DEFAULT_ON));
   const toggleColumn = (name) => {
     setVisible((prev) => {
@@ -350,7 +350,7 @@ export default function Table({ station, dj, onStationChange }) {
               </div>
 
               {/* Desktop Table */}
-              <div className="hidden sm:block w-full overflow-auto bg-white rounded-md shadow-sm border border-neutral-200">
+              <div className="w-full overflow-auto bg-white rounded-md shadow-sm border border-neutral-200">
                 <table className="min-w-full" style={{ width: "100%" }}>
                   <TableHeader
                     headers={visibleHeaders}
@@ -364,16 +364,7 @@ export default function Table({ station, dj, onStationChange }) {
                   />
                 </table>
               </div>
-
-              {/* Mobile Cards */}
-              <div className="sm:hidden">
-                <MobileTableList
-                  data={tableData}
-                  searchTerm={searchInput}
-                  onGetReport={handleGetReport}
-                />
-              </div>
-            </>
+</>
           ) : (
             <div className="py-12 text-center text-neutral-500 select-none">
               {loading ? (
