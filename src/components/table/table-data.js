@@ -5,6 +5,7 @@ import TableCell from "./table-cell";
 export default function TableData({
   data,
   visibleIndexes = [],
+  visibleHeaders = [],
   searchTerm = "",
   onGetReport,
 }) {
@@ -25,15 +26,21 @@ export default function TableData({
                   : "bg-white"
             } hover:bg-sky-50 text-[14px] ${canOpen ? "cursor-pointer" : ""}`}
           >
-            {visibleIndexes.map((cIdx) => (
-              <TableCell key={cIdx} highlight={searchTerm}>
-                {cIdx === 0 ? (
-                  <span className="font-bold text-[#1e4b8e]">{row[cIdx]}</span>
-                ) : (
-                  row[cIdx]
-                )}
-              </TableCell>
-            ))}
+            {visibleIndexes.map((cIdx, i) => {
+              const label = visibleHeaders[i];
+              const tight = label === "Title" || label === "Artist";
+              return (
+                <TableCell key={cIdx} highlight={searchTerm}>
+                  <span className={tight ? "block truncate max-w-[12rem] sm:max-w-[16rem]" : ""}>
+                    {cIdx === 0 ? (
+                      <span className="font-bold text-[#1e4b8e]">{row[cIdx]}</span>
+                    ) : (
+                      row[cIdx]
+                    )}
+                  </span>
+                </TableCell>
+              );
+            })}
           </tr>
         );
       })}

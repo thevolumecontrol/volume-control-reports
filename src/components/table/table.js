@@ -351,7 +351,7 @@ export default function Table({ station, dj, onStationChange }) {
 
               {/* Desktop Table */}
               <div className="w-full overflow-auto bg-white rounded-md shadow-sm border border-neutral-200">
-                <table className="min-w-full" style={{ width: "100%" }}>
+                <table className="w-full table-fixed" style={{ width: "100%", tableLayout: "fixed" }}>
                   <TableHeader
                     headers={visibleHeaders}
                     headerControls={headerControls}
@@ -359,6 +359,7 @@ export default function Table({ station, dj, onStationChange }) {
                   <TableData
                     data={tableData}
                     visibleIndexes={visibleIndexes}
+                    visibleHeaders={visibleHeaders}
                     searchTerm={searchInput}
                     onGetReport={handleGetReport}
                   />
